@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-gray-900 font-sans;
+    background-image: radial-gradient(ellipse at 80% 0%, rgba(99,102,241,0.06) 0%, transparent 60%),
+                      radial-gradient(ellipse at 20% 100%, rgba(139,92,246,0.04) 0%, transparent 60%);
+    background-attachment: fixed;
+  }
+
+  input, textarea, select {
+    @apply outline-none;
+  }
+
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+  }
+}
+
+@layer components {
+  /* ── Cards ────────────────────────────── */
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5 transition-all duration-200;
+  }
+  .card-hover {
+    @apply card hover:shadow-md hover:-translate-y-0.5 cursor-pointer;
+  }
+  .card-glass {
+    @apply rounded-2xl border border-white/60 p-5 transition-all duration-200;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(255,255,255,0.8) inset;
+  }
+
+  /* ── Buttons ──────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white
+           bg-indigo-600 hover:bg-indigo-700 active:scale-[0.97]
+           shadow-sm hover:shadow-md shadow-indigo-600/20
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold
+           text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300
+           active:scale-[0.97] shadow-sm transition-all duration-150;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white
+           bg-red-600 hover:bg-red-700 active:scale-[0.97]
+           shadow-sm hover:shadow-md shadow-red-600/20 transition-all duration-150;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium
+           text-gray-600 hover:bg-gray-100 hover:text-gray-900
+           active:scale-[0.97] transition-all duration-150;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-xl
+           text-gray-500 hover:bg-gray-100 hover:text-gray-700
+           active:scale-95 transition-all duration-150;
+  }
+
+  /* ── Inputs ───────────────────────────── */
+  .input-field {
+    @apply w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900
+           bg-white
+           placeholder:text-gray-400
+           focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400
+           hover:border-gray-300
+           transition-all duration-150;
+  }
+
+  .label {
+    @apply block text-xs font-semibold text-gray-600 mb-1.5 tracking-wide uppercase;
+  }
+
+  /* ── Badges ───────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border;
+  }
+
+  /* ── Modals ───────────────────────────── */
+  .modal-overlay {
+    @apply fixed inset-0 flex items-center justify-center z-50 p-4;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .modal-content {
+    @apply bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-bounce-in;
+    box-shadow: 0 24px 60px -10px rgba(15,23,42,0.3), 0 0 0 1px rgba(255,255,255,0.05);
+  }
+
+  /* ── Sidebar ──────────────────────────── */
+  .sidebar {
+    @apply w-64 bg-white border-r border-gray-100 h-screen fixed left-0 top-0 flex flex-col z-30;
+  }
+
+  /* ── Skeleton ─────────────────────────── */
+  .skeleton {
+    @apply animate-pulse bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-xl bg-[length:400%_100%];
+  }
+
+  /* ── Stat card ────────────────────────── */
+  .stat-card {
+    @apply card relative overflow-hidden;
+  }
+  .stat-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-[0.03] pointer-events-none;
+    background: linear-gradient(135deg, currentColor 0%, transparent 60%);
+  }
+
+  /* ── Divider ──────────────────────────── */
+  .divider {
+    @apply border-t border-gray-100 my-4;
+  }
+
+  /* ── Section header ───────────────────── */
+  .section-header {
+    @apply flex items-center justify-between mb-4;
+  }
+  .section-title {
+    @apply text-sm font-semibold text-gray-800;
+  }
+}
+
+/* ── Scrollbar ─────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+/* ── Focus visible ────────────────────── */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ── Selection ────────────────────────── */
+::selection {
+  background: rgba(99,102,241,0.15);
+  color: #312e81;
+}
+
+/* ── Toast customization ──────────────── */
+.Toastify__toast {
+  @apply rounded-xl font-sans text-sm;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.Toastify__toast--success { @apply bg-white text-gray-900; border-left: 3px solid #22c55e; }
+.Toastify__toast--error   { @apply bg-white text-gray-900; border-left: 3px solid #ef4444; }
+.Toastify__toast--info    { @apply bg-white text-gray-900; border-left: 3px solid #6366f1; }
+.Toastify__toast--warning { @apply bg-white text-gray-900; border-left: 3px solid #f59e0b; }
+.Toastify__progress-bar--success { background: #22c55e; }
+.Toastify__progress-bar--error   { background: #ef4444; }
+.Toastify__progress-bar--info    { background: #6366f1; }
+.Toastify__progress-bar--warning { background: #f59e0b; }
+
+/* ── Page layout ──────────────────────── */
+.page-with-sidebar {
+  @apply lg:pl-64;
+}
+.page-content {
+  @apply max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6;
+}
