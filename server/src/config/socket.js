@@ -1,15 +1,13 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { socketHandler } = require('../socket/socketHandler');
+const { corsOptions } = require('./cors');
 
 let io;
 
 const initSocket = (server) => {
   io = new Server(server, {
-    cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
-      credentials: true
-    },
+    cors: corsOptions,
     pingTimeout: 60000,
     pingInterval: 25000
   });

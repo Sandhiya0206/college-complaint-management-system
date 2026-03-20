@@ -10,6 +10,7 @@ const path = require('path');
 
 const connectDB = require('./src/config/database');
 const { initSocket } = require('./src/config/socket');
+const { corsOptions } = require('./src/config/cors');
 const errorMiddleware = require('./src/middleware/error.middleware');
 
 // Route imports
@@ -34,10 +35,7 @@ connectDB();
 
 // Security middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
