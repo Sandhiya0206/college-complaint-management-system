@@ -63,10 +63,6 @@ const login = async (req, res, next) => {
 // @desc    Logout
 // @route   POST /api/auth/logout
 const logout = (req, res) => {
-  res.cookie('token', '', {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true
-  });
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 

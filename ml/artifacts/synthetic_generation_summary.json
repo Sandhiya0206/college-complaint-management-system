@@ -1,0 +1,80 @@
+{
+  "timestamp_utc": "2026-03-15T09:15:00.203731+00:00",
+  "model_id": "hf-internal-testing/tiny-stable-diffusion-pipe",
+  "device": "cpu",
+  "width": 256,
+  "height": 256,
+  "steps": 2,
+  "guidance_scale": 0.0,
+  "requested_images_per_class": 3,
+  "minimum_total": 27,
+  "effective_target_per_class": 3,
+  "classes": {
+    "electrical": {
+      "existing_before_run": 1,
+      "generated_this_run": 2,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    },
+    "plumbing": {
+      "existing_before_run": 0,
+      "generated_this_run": 3,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    },
+    "furniture": {
+      "existing_before_run": 0,
+      "generated_this_run": 3,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    },
+    "cleanliness": {
+      "existing_before_run": 0,
+      "generated_this_run": 3,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    },
+    "ac_ventilation": {
+      "existing_before_run": 0,
+      "generated_this_run": 3,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    },
+    "internet_wifi": {
+      "existing_before_run": 0,
+      "generated_this_run": 3,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    },
+    "infrastructure": {
+      "existing_before_run": 0,
+      "generated_this_run": 3,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    },
+    "security": {
+      "existing_before_run": 0,
+      "generated_this_run": 3,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    },
+    "other": {
+      "existing_before_run": 0,
+      "generated_this_run": 3,
+      "failed_this_run": 0,
+      "final_count": 3,
+      "target_count": 3
+    }
+  },
+  "generated_total_this_run": 26,
+  "skipped_existing": 1,
+  "target_total": 27
+}

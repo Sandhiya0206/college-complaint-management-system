@@ -36,6 +36,11 @@ export const adminService = {
     return data
   },
 
+  deleteComplaint: async (id) => {
+    const { data } = await api.delete(`/admin/complaints/${id}`)
+    return data
+  },
+
   getWorkers: async () => {
     const { data } = await api.get('/admin/workers')
     return data

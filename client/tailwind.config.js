@@ -4,23 +4,30 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Manrope', 'system-ui', 'sans-serif'],
+        display: ['Sora', 'Manrope', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Menlo', 'monospace']
       },
       colors: {
         primary: {
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          500: '#6366F1',
-          600: '#4F46E5',
-          700: '#4338CA'
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          500: '#1D4ED8',
+          600: '#1E40AF',
+          700: '#1E3A8A'
         },
         ai: {
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9'
+          50: '#F8FAFC',
+          100: '#EEF2FF',
+          500: '#475569',
+          600: '#334155',
+          700: '#1E293B'
+        },
+        luxe: {
+          100: '#F7EED9',
+          300: '#E7C98A',
+          500: '#B98A2E',
+          700: '#7A5B1E'
         }
       },
       animation: {

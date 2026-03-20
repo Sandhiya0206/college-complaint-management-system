@@ -4,6 +4,8 @@ import ConfidenceBar from '../common/ConfidenceBar'
 import PriorityBadge from '../common/PriorityBadge'
 
 const METHOD_META = {
+  groq_vision:         { label: 'Groq Vision AI',    pill: 'bg-rose-100 text-rose-700 border-rose-200' },
+  groq:                { label: 'Groq Vision AI',    pill: 'bg-rose-100 text-rose-700 border-rose-200' },
   grok:                { label: 'Grok Vision AI',    pill: 'bg-rose-100 text-rose-700 border-rose-200' },
   gemini:              { label: 'Gemini Vision AI',  pill: 'bg-blue-100 text-blue-700 border-blue-200' },
   tensorflow:          { label: 'TensorFlow.js',     pill: 'bg-violet-100 text-violet-700 border-violet-200' },
@@ -85,7 +87,7 @@ const AIResultCard = ({ result, onOverride }) => {
           <div className="flex flex-wrap gap-1">
             {detectedObjects.slice(0, 6).map((obj, i) => (
               <span key={i} className={`text-[10px] rounded-full px-2 py-0.5 border ${
-                obj.source === 'grok'
+                obj.source === 'grok' || obj.source === 'groq'
                   ? 'bg-rose-50 border-rose-200 text-rose-700'
                   : obj.source === 'gemini'
                   ? 'bg-blue-50 border-blue-200 text-blue-700'
@@ -93,7 +95,7 @@ const AIResultCard = ({ result, onOverride }) => {
                   ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
                   : 'bg-white/70 border-gray-200 text-gray-600'
               }`}>
-                {obj.name}{(obj.source !== 'grok' && obj.source !== 'gemini') ? ` ${Math.round((obj.confidence || 0) * 100)}%` : ''}
+                {obj.name}{(obj.source !== 'grok' && obj.source !== 'groq' && obj.source !== 'gemini') ? ` ${Math.round((obj.confidence || 0) * 100)}%` : ''}
               </span>
             ))}
           </div>

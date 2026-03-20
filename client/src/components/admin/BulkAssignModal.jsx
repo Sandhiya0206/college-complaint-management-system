@@ -39,14 +39,14 @@ const BulkAssignModal = ({ selectedIds, workers, onClose, onSuccess }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200">
           <div>
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+            <h2 className="font-semibold text-slate-900 flex items-center gap-2">
               <Users size={16} /> Bulk Assign
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">{selectedIds.length} complaint{selectedIds.length !== 1 ? 's' : ''} selected</p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400"><X size={18} /></button>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg text-gray-500"><X size={18} /></button>
         </div>
 
         <div className="p-5 space-y-4">

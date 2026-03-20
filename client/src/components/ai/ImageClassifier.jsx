@@ -6,7 +6,7 @@ import AnalyzingAnimation from './AnalyzingAnimation'
 import AIResultCard from './AIResultCard'
 import { CATEGORIES } from '../../utils/constants'
 
-const ImageClassifier = ({ onCategoryDetected, onFilesChange }) => {
+const ImageClassifier = ({ onCategoryDetected, onFilesChange, onGeminiFailed }) => {
   const [files, setFiles] = useState([])
   const [showOverride, setShowOverride] = useState(false)
   const { analyzeImage, isAnalyzing, analysisStep, result, error, reset } = useImageClassification()
@@ -23,7 +23,11 @@ const ImageClassifier = ({ onCategoryDetected, onFilesChange }) => {
     if (aiResult && onCategoryDetected) {
       onCategoryDetected(aiResult)
     }
-  }, [analyzeImage, onCategoryDetected, onFilesChange])
+    // If Gemini failed (keyword fallback used), open manual picker in parent
+    if (aiResult?.method === 'keyword_fallback') {
+      onGeminiFailed?.()
+    }
+  }, [analyzeImage, onCategoryDetected, onFilesChange, onGeminiFailed])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -77,8 +81,8 @@ const ImageClassifier = ({ onCategoryDetected, onFilesChange }) => {
                 <p className="text-gray-400 text-sm mt-1">or click to select • JPEG, PNG, GIF, WebP • max 5MB • up to 5 images</p>
               </div>
               <div className="flex items-center gap-2 text-xs text-violet-600 bg-violet-50 px-3 py-1.5 rounded-full border border-violet-200">
-                <span>🤖</span>
-                <span>AI auto-fills Category + Priority + Assignment</span>
+                <span>☁️</span>
+                <span>Gemini Vision auto-fills Category + Title + Description</span>
               </div>
             </>
           )}
@@ -109,10 +113,14 @@ const ImageClassifier = ({ onCategoryDetected, onFilesChange }) => {
         </div>
       )}
 
-      {/* AI error */}
+      {/* AI error — friendly prompt to pick manually */}
       {error && !isAnalyzing && (
-        <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-          ⚠️ {error}
+        <div className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 space-y-2">
+          <div className="flex items-center gap-2 text-amber-300 text-xs font-bold">
+            <span>⚠️</span>
+            <span>Gemini Vision is unavailable right now (quota / network)</span>
+          </div>
+          <p className="text-xs text-gray-400">No problem — use the <strong className="text-white">Pick Category Manually</strong> button below to continue.</p>
         </div>
       )}
 

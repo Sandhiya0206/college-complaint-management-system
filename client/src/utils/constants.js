@@ -9,7 +9,12 @@ export const CATEGORY_KEYWORD_MAP = {
     'power strip', 'extension cord', 'spotlight', 'torch', 'flashlight', 'chandelier',
     'ceiling fixture', 'fluorescent', 'tube light', 'led', 'incandescent', 'halogen',
     'electric meter', 'surge protector', 'wall socket', 'light switch', 'dimmer',
-    'electrical panel', 'junction box', 'conduit', 'generator'
+    'electrical panel', 'junction box', 'conduit', 'generator',
+    // Tamil-English / campus-specific
+    'no light', 'light gone', 'light problem', 'current problem', 'no current',
+    'sparking', 'shock', 'trip', 'tripping', 'fuse gone', 'power gone', 'no power',
+    'tube light not', 'bulb not', 'fan wiring', 'light not', 'current not',
+    'switchboard broken', 'switch broken', 'socket broken', 'plug not working'
   ],
   Plumbing: [
     // Plain English
@@ -19,7 +24,12 @@ export const CATEGORY_KEYWORD_MAP = {
     // MobileNet ImageNet classes
     'bathroom sink', 'bathtub', 'water faucet', 'plunger', 'water hose', 'pipe wrench',
     'water bucket', 'water tank', 'water pump', 'cistern', 'urinal', 'bidet',
-    'radiator', 'water heater', 'boiler', 'gutter', 'manhole'
+    'radiator', 'water heater', 'boiler', 'gutter', 'manhole',
+    // Tamil-English / campus-specific
+    'no water', 'water not', 'water supply', 'water issue', 'pipe issue', 'tap issue',
+    'tap broken', 'tap drip', 'toilet issue', 'toilet problem', 'flush problem',
+    'drain issue', 'water flowing', 'bathroom flood', 'water flooding', 'pipe blocked',
+    'seeping', 'seepage', 'overflow toilet', 'water coming', 'washroom flood'
   ],
   Furniture: [
     // Plain English
@@ -31,7 +41,12 @@ export const CATEGORY_KEYWORD_MAP = {
     'bookshelf', 'bookcase', 'filing cabinet', 'storage cabinet', 'credenza',
     'study desk', 'writing table', 'dining table', 'coffee table', 'side table',
     'bunk bed', 'single bed', 'mattress', 'pillow', 'curtain', 'blind', 'whiteboard',
-    'blackboard', 'chalkboard', 'wooden', 'plastic chair', 'steel rack'
+    'blackboard', 'chalkboard', 'wooden', 'plastic chair', 'steel rack',
+    // Tamil-English / campus-specific
+    'chair damage', 'table damage', 'bench damage', 'desk broken', 'almirah',
+    'door not open', 'door stuck', 'window not close', 'glass broken', 'window glass',
+    'door hinge', 'door handle', 'lock handle', 'cupboard door', 'locker door',
+    'broken bench', 'broken desk', 'furniture damage', 'chair leg broken'
   ],
   Cleanliness: [
     // Plain English
@@ -41,7 +56,13 @@ export const CATEGORY_KEYWORD_MAP = {
     // MobileNet ImageNet classes
     'garbage truck', 'trash can', 'waste bin', 'dustbin', 'rubbish', 'compost',
     'broom', 'mop', 'cleaning supplies', 'detergent', 'bucket', 'sponge',
-    'paper bag', 'plastic bag', 'cardboard', 'debris', 'sewage', 'overflowing bin'
+    'paper bag', 'plastic bag', 'cardboard', 'debris', 'sewage', 'overflowing bin',
+    // Tamil-English / campus-specific
+    'not clean', 'not sweeping', 'mosquito', 'mice', 'ants', 'flies', 'bugs',
+    'fungus', 'mould', 'foul', 'stench', 'unclean', 'unhygienic', 'contaminated',
+    'garbage pile', 'waste pile', 'overflowing dustbin', 'bin overflow',
+    'bathroom smell', 'toilet smell', 'mess hall dirty', 'cafeteria dirty',
+    'spider web', 'spider', 'lizard', 'pigeon', 'bird droppings'
   ],
   'AC/Ventilation': [
     // Plain English
@@ -51,7 +72,12 @@ export const CATEGORY_KEYWORD_MAP = {
     // MobileNet ImageNet classes
     'ceiling fan', 'pedestal fan', 'table fan', 'electric fan', 'oscillating fan',
     'wall fan', 'exhaust fan', 'air handler', 'vent cover', 'grille', 'louver',
-    'humidifier', 'dehumidifier', 'space heater', 'portable ac', 'thermostat'
+    'humidifier', 'dehumidifier', 'space heater', 'portable ac', 'thermostat',
+    // Tamil-English / campus-specific
+    'ac problem', 'ac issue', 'ac not', 'fan problem', 'fan noise', 'fan sound',
+    'fan vibrating', 'room hot', 'room temperature', 'heat problem', 'no air',
+    'suffocating', 'poor ventilation', 'exhaust broken', 'vent blocked',
+    'ac water dripping', 'ac leaking', 'air not cool', 'cool not working'
   ],
   'Internet/WiFi': [
     // Plain English
@@ -61,7 +87,12 @@ export const CATEGORY_KEYWORD_MAP = {
     // MobileNet ImageNet classes
     'wireless router', 'network switch', 'network hub', 'ethernet cable', 'rj45',
     'patch panel', 'server rack', 'networking equipment', 'access point', 'repeater',
-    'fiber optic', 'cat6', 'cat5', 'data port', 'telephone'
+    'fiber optic', 'cat6', 'cat5', 'data port', 'telephone',
+    // Tamil-English / campus-specific
+    'net', 'wifi problem', 'wifi issue', 'net problem', 'net issue', 'internet issue',
+    'no network', 'network down', 'wifi down', 'internet down', 'connectivity',
+    'slow network', 'poor signal', 'weak signal', 'dropping connection', 'ping high',
+    'wifi password', 'cannot connect', 'not able to connect', 'connection issue'
   ],
   Infrastructure: [
     // Plain English
@@ -72,7 +103,13 @@ export const CATEGORY_KEYWORD_MAP = {
     'construction', 'tile', 'brick', 'stone wall', 'marble floor', 'granite',
     'plywood', 'scaffold', 'ladder', 'hammer', 'drill', 'renovation',
     'window frame', 'door frame', 'stairwell', 'corridor', 'hallway', 'balcony',
-    'terrace', 'basement', 'parking', 'road', 'pavement', 'pathway'
+    'terrace', 'basement', 'parking', 'road', 'pavement', 'pathway',
+    // Tamil-English / campus-specific
+    'wall problem', 'ceiling problem', 'floor problem', 'roof problem',
+    'cracking', 'cracked', 'peeling', 'chipping', 'broken tiles', 'floor tiles',
+    'wall damage', 'ceiling damage', 'plaster damage', 'waterproof', 'dampness',
+    'damp wall', 'wet wall', 'moss on wall', 'seepage from ceiling', 'road damage',
+    'pathway broken', 'railing broken', 'step broken', 'step cracked'
   ],
   Security: [
     // Plain English
@@ -82,7 +119,12 @@ export const CATEGORY_KEYWORD_MAP = {
     // MobileNet ImageNet classes
     'padlock', 'deadbolt', 'door lock', 'security camera', 'surveillance camera',
     'biometric', 'fingerprint scanner', 'access card', 'id card', 'barrier',
-    'barbed wire', 'fence', 'grille door', 'shutter', 'intercom', 'doorbell'
+    'barbed wire', 'fence', 'grille door', 'shutter', 'intercom', 'doorbell',
+    // Tamil-English / campus-specific
+    'lock problem', 'lock broken', 'lock not working', 'key missing', 'key lost',
+    'gate problem', 'gate broken', 'gate open', 'gate not closing', 'gate stuck',
+    'cctv problem', 'camera not working', 'fire exit', 'fire extinguisher',
+    'emergency exit', 'safety', 'stranger', 'trespassing', 'hostel security'
   ],
   Other: []
 }
@@ -112,7 +154,8 @@ export const STATUS_COLORS = {
   Assigned: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200' },
   'In Progress': { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200' },
   Resolved: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200' },
-  Rejected: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200' }
+  Rejected: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200' },
+  'Deleted by Admin': { bg: 'bg-gray-200', text: 'text-gray-600', border: 'border-gray-300' }
 }
 
 export const PRIORITY_COLORS = {

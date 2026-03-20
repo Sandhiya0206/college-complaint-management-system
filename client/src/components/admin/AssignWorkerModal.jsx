@@ -23,30 +23,30 @@ const AssignWorkerModal = ({ complaint, workers, onClose, onAssigned }) => {
   }
 
   const getWorkloadColor = (count) => {
-    if (count >= 5) return 'text-red-600 bg-red-50'
-    if (count >= 3) return 'text-yellow-600 bg-yellow-50'
-    return 'text-green-600 bg-green-50'
+    if (count >= 5) return 'text-red-700 bg-red-100'
+    if (count >= 3) return 'text-yellow-700 bg-yellow-100'
+    return 'text-green-700 bg-green-100'
   }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Assign Worker</h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400"><X size={18} /></button>
+        <div className="flex items-center justify-between p-5 border-b border-slate-200">
+          <h2 className="font-semibold text-slate-900">Assign Worker</h2>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg text-gray-500"><X size={18} /></button>
         </div>
 
         <div className="p-5">
-          <div className="p-3 bg-indigo-50 rounded-xl text-sm mb-4">
-            <span className="font-mono text-indigo-600 font-medium">{complaint.complaintId}</span>
-            <p className="text-gray-600 mt-0.5">{complaint.category} — {complaint.location}</p>
+          <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-sm mb-4">
+            <span className="font-mono text-indigo-700 font-medium">{complaint.complaintId}</span>
+            <p className="text-slate-600 mt-0.5">{complaint.category} — {complaint.location}</p>
           </div>
 
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {workers?.map(w => (              <label
                 key={w._id}
                 className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
-                  selectedId === w._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
+                  selectedId === w._id ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'
                 }`}
               >
                 <input
@@ -57,12 +57,12 @@ const AssignWorkerModal = ({ complaint, workers, onClose, onAssigned }) => {
                   onChange={() => setSelectedId(w._id)}
                   className="accent-indigo-600"
                 />
-                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm flex-shrink-0">
+                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-semibold text-sm flex-shrink-0">
                   {w.name?.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900">{w.name}</div>
-                  <div className="text-xs text-gray-500 flex items-center gap-1"><Briefcase size={10} />{w.department}</div>
+                  <div className="text-sm font-medium text-slate-900">{w.name}</div>
+                  <div className="text-xs text-gray-600 flex items-center gap-1"><Briefcase size={10} />{w.department}</div>
                 </div>
                 <div className={`text-xs px-2 py-0.5 rounded-full font-medium ${getWorkloadColor(w.activeComplaintCount ?? 0)}`}>
                   {w.activeComplaintCount ?? 0} active

@@ -41,22 +41,22 @@ const WorkerStats = ({ stats }) => {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-lg font-bold text-gray-900">{Math.round(completionRate)}%</span>
-              <span className="text-[10px] text-gray-400">rate</span>
+              <span className="text-lg font-bold text-slate-900">{Math.round(completionRate)}%</span>
+              <span className="text-[10px] text-gray-500">rate</span>
             </div>
           </div>
           <div className="space-y-1.5">
             {donutData.map((d, i) => (
               <div key={d.name} className="flex items-center gap-2 text-xs">
                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: DONUT_COLORS[i] }} />
-                <span className="text-gray-500">{d.name}:</span>
+                <span className="text-gray-600">{d.name}:</span>
                 <span className="font-semibold text-gray-800">{d.value}</span>
               </div>
             ))}
           </div>
         </div>
-        <div className="mt-3 p-2 bg-gray-50 rounded-lg text-xs text-gray-500 text-center">
-          Resolved today: <span className="font-semibold text-gray-700">{completedToday}</span>
+        <div className="mt-3 p-2 bg-slate-50 rounded-lg text-xs text-gray-600 text-center border border-slate-200/70">
+          Resolved today: <span className="font-semibold text-gray-900">{completedToday}</span>
         </div>
       </div>
 
@@ -73,7 +73,7 @@ const WorkerStats = ({ stats }) => {
                     <span className="text-gray-600 truncate">{c._id}</span>
                     <span className="font-medium text-gray-800">{c.count}</span>
                   </div>
-                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-700"
                       style={{ width: `${completedTotal > 0 ? (c.count / completedTotal) * 100 : 0}%`, background: COLORS[i % COLORS.length] }}
@@ -84,7 +84,7 @@ const WorkerStats = ({ stats }) => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-400 text-center py-4">No data yet</p>
+          <p className="text-sm text-gray-500 text-center py-4">No data yet</p>
         )}
       </div>
     </div>

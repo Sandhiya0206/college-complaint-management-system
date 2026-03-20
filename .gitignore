@@ -4,3 +4,6 @@ dist/
 *.log
 uploads/
 .DS_Store
+ml/raw_dataset/
+ml/dataset/
+ml/artifacts/models/

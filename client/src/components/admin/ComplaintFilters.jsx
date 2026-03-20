@@ -15,7 +15,7 @@ const ComplaintFilters = ({ filters, onChange, onClear }) => {
       <button
         onClick={() => setShowPanel(p => !p)}
         className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-          hasActive ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-300'
+          hasActive ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-slate-200 hover:border-indigo-400'
         }`}
       >
         <Filter size={14} />
@@ -27,9 +27,9 @@ const ComplaintFilters = ({ filters, onChange, onClear }) => {
       </button>
 
       {showPanel && (
-        <div className="absolute right-0 top-10 z-20 bg-white border border-gray-200 rounded-xl shadow-lg p-4 w-72 space-y-4">
+        <div className="absolute right-0 top-10 z-20 bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-300/30 p-4 w-72 space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-700">Filter Complaints</span>
+            <span className="text-sm font-semibold text-slate-800">Filter Complaints</span>
             <button onClick={() => { onClear(); setShowPanel(false) }} className="text-xs text-red-500 hover:underline">Clear all</button>
           </div>
 
@@ -41,7 +41,7 @@ const ComplaintFilters = ({ filters, onChange, onClear }) => {
                 <button
                   key={s}
                   onClick={() => onChange({ ...filters, status: filters.status === s ? '' : s })}
-                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${filters.status === s ? 'bg-indigo-600 text-white border-indigo-600' : 'text-gray-600 border-gray-200 hover:border-indigo-300'}`}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${filters.status === s ? 'bg-indigo-600 text-white border-indigo-600' : 'text-gray-600 border-slate-200 hover:border-indigo-400'}`}
                 >
                   {s}
                 </button>
@@ -57,7 +57,7 @@ const ComplaintFilters = ({ filters, onChange, onClear }) => {
                 <button
                   key={p}
                   onClick={() => onChange({ ...filters, priority: filters.priority === p ? '' : p })}
-                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${filters.priority === p ? 'bg-indigo-600 text-white border-indigo-600' : 'text-gray-600 border-gray-200 hover:border-indigo-300'}`}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${filters.priority === p ? 'bg-indigo-600 text-white border-indigo-600' : 'text-gray-600 border-slate-200 hover:border-indigo-400'}`}
                 >
                   {p}
                 </button>

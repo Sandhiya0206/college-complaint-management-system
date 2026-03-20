@@ -49,10 +49,10 @@ const AnalyticsCharts = ({ stats }) => {
         <h3 className="text-sm font-semibold text-gray-700 mb-4">Status Distribution</h3>
         <ResponsiveContainer width="100%" height={150}>
           <BarChart data={statusData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-            <YAxis tick={{ fontSize: 10 }} />
-            <Tooltip contentStyle={{ fontSize: 12 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.25)" />
+            <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
+            <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
+            <Tooltip contentStyle={{ fontSize: 12, background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(148,163,184,0.25)', color: '#0f172a', borderRadius: '10px' }} />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
             </Bar>
@@ -66,16 +66,16 @@ const AnalyticsCharts = ({ stats }) => {
         {workerData.length > 0 ? (
           <ResponsiveContainer width="100%" height={150}>
             <BarChart data={workerData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip contentStyle={{ fontSize: 12 }} />
-              <Legend wrapperStyle={{ fontSize: 10 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.25)" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
+              <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
+              <Tooltip contentStyle={{ fontSize: 12, background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(148,163,184,0.25)', color: '#0f172a', borderRadius: '10px' }} />
+              <Legend wrapperStyle={{ fontSize: 10, color: '#475569' }} />
               <Bar dataKey="active" fill="#6366f1" radius={[4, 4, 0, 0]} name="Active" />
               <Bar dataKey="resolved" fill="#22c55e" radius={[4, 4, 0, 0]} name="Resolved" />
             </BarChart>
           </ResponsiveContainer>
-        ) : <p className="text-sm text-gray-400 text-center py-8">No worker data</p>}
+        ) : <p className="text-sm text-gray-500 text-center py-8">No worker data</p>}
       </div>
 
       {/* Priority */}
@@ -92,7 +92,7 @@ const AnalyticsCharts = ({ stats }) => {
                   <span className="text-gray-600">{p.name}</span>
                   <span className="font-semibold text-gray-800">{p.value} ({pct}%)</span>
                 </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
                 </div>
               </div>

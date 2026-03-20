@@ -145,7 +145,141 @@ export const calculatePriority = (category, confidence = 1, detectedObjects = []
 }
 
 /**
- * Real-time text analysis from description + location fields
+ * High-precision multi-word phrase map.
+ * Each entry: [phrase, category, weight]
+ * Checked before single keywords — matched phrases get much higher confidence.
+ */
+const PHRASE_MAP = [
+  // ── Electrical ──────────────────────────────────────────────────────────────
+  ['light not coming',         'Electrical', 15],
+  ['light not working',        'Electrical', 15],
+  ['lights not working',       'Electrical', 15],
+  ['current not coming',       'Electrical', 15],
+  ['current not going',        'Electrical', 15],
+  ['current gone',             'Electrical', 12],
+  ['no power supply',          'Electrical', 12],
+  ['no current',               'Electrical', 12],
+  ['tube light not',           'Electrical', 12],
+  ['bulb fused',               'Electrical', 12],
+  ['bulb not working',         'Electrical', 12],
+  ['switch not working',       'Electrical', 12],
+  ['socket not working',       'Electrical', 12],
+  ['switchboard not working',  'Electrical', 12],
+  ['short circuit',            'Electrical', 15],
+  ['electric shock',           'Electrical', 18],
+  ['sparking wire',            'Electrical', 15],
+  ['fuse blown',               'Electrical', 12],
+  ['mcb tripped',              'Electrical', 12],
+  ['wiring problem',           'Electrical', 12],
+  ['power cut',                'Electrical', 10],
+  // ── Plumbing ─────────────────────────────────────────────────────────────────
+  ['water not coming',         'Plumbing', 15],
+  ['no water supply',          'Plumbing', 15],
+  ['water supply problem',     'Plumbing', 12],
+  ['water problem',            'Plumbing', 10],
+  ['pipe leaking',             'Plumbing', 15],
+  ['pipe burst',               'Plumbing', 18],
+  ['tap dripping',             'Plumbing', 12],
+  ['tap leaking',              'Plumbing', 12],
+  ['tap not working',          'Plumbing', 12],
+  ['toilet blocked',           'Plumbing', 15],
+  ['toilet not flushing',      'Plumbing', 15],
+  ['toilet overflow',          'Plumbing', 15],
+  ['flush not working',        'Plumbing', 15],
+  ['drain blocked',            'Plumbing', 12],
+  ['drain clogged',            'Plumbing', 12],
+  ['bathroom flooding',        'Plumbing', 18],
+  ['water leaking',            'Plumbing', 12],
+  ['water seeping',            'Plumbing', 12],
+  ['overhead tank',            'Plumbing', 10],
+  // ── Furniture ────────────────────────────────────────────────────────────────
+  ['chair broken',             'Furniture', 15],
+  ['table broken',             'Furniture', 15],
+  ['bench broken',             'Furniture', 15],
+  ['desk broken',              'Furniture', 15],
+  ['door not closing',         'Furniture', 12],
+  ['door not locking',         'Furniture', 10],
+  ['window broken',            'Furniture', 12],
+  ['window glass broken',      'Furniture', 15],
+  ['cupboard broken',          'Furniture', 12],
+  ['locker broken',            'Furniture', 12],
+  ['hinge broken',             'Furniture', 10],
+  ['door knob broken',         'Furniture', 12],
+  // ── Cleanliness ──────────────────────────────────────────────────────────────
+  ['not cleaned',              'Cleanliness', 12],
+  ['not swept',                'Cleanliness', 12],
+  ['garbage not collected',    'Cleanliness', 15],
+  ['garbage not removed',      'Cleanliness', 15],
+  ['dustbin full',             'Cleanliness', 12],
+  ['dustbin overflowing',      'Cleanliness', 12],
+  ['bad smell',                'Cleanliness', 12],
+  ['foul smell',               'Cleanliness', 12],
+  ['smell problem',            'Cleanliness', 10],
+  ['pest infestation',         'Cleanliness', 15],
+  ['cockroach problem',        'Cleanliness', 15],
+  ['rat problem',              'Cleanliness', 12],
+  ['mosquito breeding',        'Cleanliness', 12],
+  ['dirty toilet',             'Cleanliness', 12],
+  ['dirty washroom',           'Cleanliness', 12],
+  ['stagnant water',           'Cleanliness', 12],
+  // ── AC/Ventilation ───────────────────────────────────────────────────────────
+  ['ac not working',           'AC/Ventilation', 15],
+  ['ac not cooling',           'AC/Ventilation', 15],
+  ['air conditioner not',      'AC/Ventilation', 15],
+  ['no cooling',               'AC/Ventilation', 12],
+  ['room very hot',            'AC/Ventilation', 12],
+  ['no ventilation',           'AC/Ventilation', 12],
+  ['exhaust fan not working',  'AC/Ventilation', 12],
+  ['exhaust not working',      'AC/Ventilation', 12],
+  ['ac dripping',              'AC/Ventilation', 10],
+  ['ac making noise',          'AC/Ventilation', 10],
+  ['fan not cooling',          'AC/Ventilation', 12],
+  ['room is stuffy',           'AC/Ventilation', 10],
+  // ── Internet/WiFi ────────────────────────────────────────────────────────────
+  ['wifi not working',         'Internet/WiFi', 15],
+  ['wifi not connecting',      'Internet/WiFi', 15],
+  ['no wifi',                  'Internet/WiFi', 12],
+  ['internet not working',     'Internet/WiFi', 15],
+  ['slow internet',            'Internet/WiFi', 10],
+  ['no internet',              'Internet/WiFi', 12],
+  ['network not working',      'Internet/WiFi', 12],
+  ['net not working',          'Internet/WiFi', 15],
+  ['lan not working',          'Internet/WiFi', 12],
+  ['wifi disconnecting',       'Internet/WiFi', 10],
+  ['no signal',                'Internet/WiFi', 10],
+  ['network problem',          'Internet/WiFi', 10],
+  // ── Infrastructure ───────────────────────────────────────────────────────────
+  ['wall crack',               'Infrastructure', 15],
+  ['crack in wall',            'Infrastructure', 15],
+  ['ceiling crack',            'Infrastructure', 15],
+  ['crack in ceiling',         'Infrastructure', 15],
+  ['roof leaking',             'Infrastructure', 15],
+  ['roof leak',                'Infrastructure', 12],
+  ['floor tile broken',        'Infrastructure', 12],
+  ['tile broken',              'Infrastructure', 10],
+  ['tile cracked',             'Infrastructure', 10],
+  ['plaster falling',          'Infrastructure', 15],
+  ['plaster peeling',          'Infrastructure', 12],
+  ['paint peeling',            'Infrastructure', 10],
+  ['railing loose',            'Infrastructure', 12],
+  ['broken step',              'Infrastructure', 12],
+  ['staircase damaged',        'Infrastructure', 12],
+  ['wall seepage',             'Infrastructure', 12],
+  ['seepage in wall',          'Infrastructure', 12],
+  // ── Security ─────────────────────────────────────────────────────────────────
+  ['lock broken',              'Security', 15],
+  ['door lock broken',         'Security', 15],
+  ['cctv not working',         'Security', 15],
+  ['gate not locking',         'Security', 12],
+  ['fire extinguisher',        'Security', 10],
+  ['unauthorized entry',       'Security', 15],
+  ['lost key',                 'Security', 10],
+]
+
+/**
+ * Real-time text analysis from description + location fields.
+ * Phase 1: phrase matching (high-precision, high-weight).
+ * Phase 2: single keyword scoring (broad coverage, lower weight).
  */
 export const analyzeText = (text = '') => {
   if (!text || text.trim().length < 3) return null
@@ -153,6 +287,14 @@ export const analyzeText = (text = '') => {
   const scores = {}
   Object.keys(CATEGORY_KEYWORD_MAP).forEach(cat => { scores[cat] = 0 })
 
+  // ── Phase 1: multi-word phrase matching ──────────────────────────────────────
+  for (const [phrase, category, weight] of PHRASE_MAP) {
+    if (lower.includes(phrase)) {
+      scores[category] += weight
+    }
+  }
+
+  // ── Phase 2: single-keyword scoring ──────────────────────────────────────────
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORD_MAP)) {
     if (category === 'Other') continue
     for (const keyword of keywords) {
@@ -170,7 +312,9 @@ export const analyzeText = (text = '') => {
 
   const [topCategory, topScore] = sorted[0]
   const secondScore = sorted[1]?.[1] || 0
-  const confidence = Math.min(0.35 + (topScore - secondScore) * 0.08, 0.82)
+  // Phrase-boosted confidence: scores ≥12 = phrase match → floor 0.70 confidence
+  const baseConf  = Math.min(0.35 + (topScore - secondScore) * 0.08, 0.82)
+  const confidence = topScore >= 12 ? Math.max(baseConf, 0.70) : baseConf
   const priority = calculatePriority(topCategory, confidence, [], lower)
 
   return { category: topCategory, priority, confidence, method: 'text_analysis', detectedObjects: [] }

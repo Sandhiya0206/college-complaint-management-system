@@ -70,8 +70,19 @@ const complaintSchema = new mongoose.Schema({
   assignedAt: Date,
   aiAnalysis: {
     suggestedCategory: String,
+    suggestedTitle: String,
+    suggestedDescription: String,
     finalCategory: String,
     confidence: { type: Number, min: 0, max: 1 },
+    confidenceThreshold: { type: Number, min: 0, max: 1 },
+    isUncertain: { type: Boolean, default: false },
+    uncertaintyReasons: [String],
+    topCategories: [{
+      category: String,
+      confidence: Number,
+      score: Number,
+      source: String
+    }],
     detectedObjects: [{
       name: String,
       confidence: Number
@@ -82,8 +93,31 @@ const complaintSchema = new mongoose.Schema({
     }],
     method: {
       type: String,
-      enum: ['tensorflow', 'google_vision', 'hybrid', 'keyword_fallback']
+      enum: [
+        'tensorflow',
+        'google_vision',
+        'hybrid',
+        'keyword_fallback',
+        'groq_vision',
+        'groq_text',
+        'text_analysis',
+        'clip_local',
+        'gemini',
+        'gemini_text',
+        'grok'
+      ]
     },
+    modelSource: String,
+    signalBreakdown: [{
+      signal: String,
+      source: String,
+      category: String,
+      rank: Number,
+      confidence: Number,
+      weight: Number,
+      contribution: Number,
+      rawConfidence: Number
+    }],
     isSafeContent: { type: Boolean, default: true },
     studentOverrode: { type: Boolean, default: false },
     analyzedAt: Date

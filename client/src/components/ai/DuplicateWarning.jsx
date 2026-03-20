@@ -4,7 +4,7 @@ import { Copy, GitMerge, AlertTriangle, ExternalLink, CheckCircle2, ArrowRight }
 /**
  * DuplicateWarning
  * Props:
- *   matches   – array from findSimilarComplaints: { _id, title, category, location, status, score, hostelBlock }
+ *   matches   – array from findSimilarComplaints: { _id, title, category, location, status, similarityScore, hostelBlock }
  *   onDismiss – () => void — user ignores duplicates and proceeds
  *   onMerge   – (originalId) => void — user wants to merge
  */
@@ -67,7 +67,7 @@ export default function DuplicateWarning({ matches = [], onDismiss, onMerge }) {
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[m.status] || 'text-white/60 bg-white/10'}`}>
                   {m.status}
                 </span>
-                <span className="text-xs text-white/40">{Math.round((m.score || 0) * 100)}% match</span>
+                <span className="text-xs text-white/40">{Math.round(m.similarityScore || 0)}% match</span>
               </div>
             </div>
             {selected === m._id && (

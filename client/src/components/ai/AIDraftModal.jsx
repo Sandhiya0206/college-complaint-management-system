@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Sparkles, Copy, Check, X, Wand2 } from 'lucide-react'
 import { workerService } from '../../services/worker.service'
 
@@ -6,10 +6,12 @@ import { workerService } from '../../services/worker.service'
  * AIDraftModal
  * Props:
  *   complaintId – string
+ *   status      – 'In Progress' | 'On Hold' | 'Resolved'
+ *   keywords    – string
  *   onUse       – (text: string) => void
  *   onClose     – () => void
  */
-export default function AIDraftModal({ complaintId, onUse, onClose }) {
+export default function AIDraftModal({ complaintId, status, keywords, onUse, onClose }) {
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -17,11 +19,28 @@ export default function AIDraftModal({ complaintId, onUse, onClose }) {
   const [generated, setGenerated] = useState(false)
   const [error, setError] = useState('')
 
+  const cleanedKeywords = String(keywords || '').trim()
+
+  useEffect(() => {
+    if (!generated) return
+    setGenerated(false)
+    setDraft('')
+    setEdited('')
+  }, [status, cleanedKeywords])
+
   const generate = async () => {
+    if (cleanedKeywords.length < 5) {
+      setError('Please enter a few keywords first (e.g. replaced switch, tested circuit).')
+      return
+    }
+
     setLoading(true)
     setError('')
     try {
-      const res = await workerService.getAIDraft(complaintId)
+      const res = await workerService.getAIDraft(complaintId, {
+        status,
+        keywords: cleanedKeywords,
+      })
       setDraft(res.draft)
       setEdited(res.draft)
       setGenerated(true)
@@ -39,7 +58,7 @@ export default function AIDraftModal({ complaintId, onUse, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
@@ -64,8 +83,12 @@ export default function AIDraftModal({ complaintId, onUse, onClose }) {
           {!generated ? (
             <>
               <p className="text-sm text-white/60">
-                Generate a professional status update message for this complaint using AI context about the issue, location, and priority.
+                Generate a professional status update message using complaint context and your work keywords.
               </p>
+              <div className="text-xs text-white/50 bg-white/5 border border-white/10 rounded-lg p-2.5">
+                <div><span className="text-white/70 font-medium">Status:</span> {status}</div>
+                <div className="mt-1"><span className="text-white/70 font-medium">Keywords:</span> {cleanedKeywords || 'Not provided'}</div>
+              </div>
               {error && <p className="text-red-400 text-xs">{error}</p>}
               <button
                 onClick={generate}

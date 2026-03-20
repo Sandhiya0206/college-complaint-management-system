@@ -5,19 +5,20 @@ import { getCategoryIcon, formatDate } from '../../utils/helpers'
 import { MapPin, ChevronRight, Brain, AlertTriangle } from 'lucide-react'
 
 const ComplaintCard = ({ complaint, onClick }) => {
-  const { complaintId, category, priority, status, location, aiAnalysis, assignedTo, createdAt, images, isEscalated } = complaint
+  const { complaintId, category, priority, status, location, aiAnalysis, assignedTo, createdAt, images, isEscalated, rejectionReason, isActive } = complaint
+  const displayStatus = (isActive === false || rejectionReason === 'Deleted by admin') ? 'Deleted by Admin' : status
 
   return (
     <div
       onClick={onClick}
-      className="card cursor-pointer hover:border-indigo-200 active:scale-[0.99] transition-all"
+      className="card cursor-pointer hover:border-indigo-500/50 active:scale-[0.99] transition-all"
     >
       <div className="flex items-start gap-3">
         {/* Image thumbnail */}
         {images?.[0] ? (
-          <img src={images[0]} alt="" className="w-12 h-12 object-cover rounded-lg flex-shrink-0 border border-gray-200" />
+          <img src={images[0]} alt="" className="w-12 h-12 object-cover rounded-lg flex-shrink-0 border border-white/10" />
         ) : (
-          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
+          <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
             {getCategoryIcon(category)}
           </div>
         )}
@@ -28,10 +29,10 @@ const ComplaintCard = ({ complaint, onClick }) => {
             <div>
               <span className="font-mono text-xs text-indigo-600 font-medium">{complaintId}</span>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-sm font-semibold text-gray-900">{getCategoryIcon(category)} {category}</span>
+                <span className="text-sm font-semibold text-gray-100">{getCategoryIcon(category)} {category}</span>
               </div>
             </div>
-            <ChevronRight size={16} className="text-gray-300 flex-shrink-0 mt-1" />
+            <ChevronRight size={16} className="text-gray-600 flex-shrink-0 mt-1" />
           </div>
 
           {/* Location */}
@@ -42,7 +43,7 @@ const ComplaintCard = ({ complaint, onClick }) => {
 
           {/* Badges */}
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
-            <StatusBadge status={status} />
+            <StatusBadge status={displayStatus} />
             <PriorityBadge priority={priority} />
             {isEscalated && (
               <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200 font-semibold">

@@ -35,7 +35,7 @@ const LoginForm = ({ prefilledRole, role: roleProp, onSwitchToRegister }) => {
       const data = await login(formData.email, formData.password, role)
       const userRole = data?.user?.role || role
       toast.success(`Welcome back! Logged in as ${roleLabels[userRole] || userRole}`)
-      navigate(`/${userRole}`)
+      navigate(`/${userRole}`, { replace: true })
     } catch (err) {
       setError(err.message || 'Invalid credentials. Please try again.')
     } finally {
@@ -55,10 +55,10 @@ const LoginForm = ({ prefilledRole, role: roleProp, onSwitchToRegister }) => {
         <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br ${meta.gradient} flex items-center justify-center text-2xl shadow-lg mb-4 animate-float`}>
           {meta.emoji}
         </div>
-        <h2 className="text-2xl font-black tracking-tight text-gray-900">
+        <h2 className="text-2xl font-black tracking-tight text-white">
           {meta.label} Sign In
         </h2>
-        <p className="text-gray-500 text-sm mt-1">Welcome back — enter your credentials below</p>
+        <p className="text-gray-400 text-sm mt-1">Welcome back — enter your credentials below</p>
         <span className={`inline-flex mt-2 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${meta.badge}`}>
           {meta.label} Portal
         </span>
@@ -66,7 +66,7 @@ const LoginForm = ({ prefilledRole, role: roleProp, onSwitchToRegister }) => {
 
       {/* Error */}
       {error && (
-        <div className="mb-5 p-3.5 bg-red-50 border-l-4 border-red-500 rounded-lg flex items-start gap-2.5 text-red-700 text-sm animate-fade-in-up">
+        <div className="mb-5 p-3.5 border-l-4 border-red-500 rounded-lg flex items-start gap-2.5 text-red-400 text-sm animate-fade-in-up" style={{background:'rgba(239,68,68,0.1)'}}>
           <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
@@ -140,7 +140,7 @@ const LoginForm = ({ prefilledRole, role: roleProp, onSwitchToRegister }) => {
         <button
           type="button"
           onClick={fillDemo}
-          className="w-full py-2.5 px-4 rounded-xl border-2 border-dashed border-gray-200 text-xs text-gray-500 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all duration-200 flex items-center justify-center gap-2 font-medium"
+          className="w-full py-2.5 px-4 rounded-xl border-2 border-dashed text-xs transition-all duration-200 flex items-center justify-center gap-2 font-medium" style={{borderColor:'rgba(255,255,255,0.12)',color:'#94a3b8'}}
         >
           <span>⚡</span>
           Fill demo credentials for {meta.label}

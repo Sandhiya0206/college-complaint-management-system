@@ -8,7 +8,11 @@
     "client": "cd client && npm run dev",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
     "seed": "cd server && npm run seed",
-    "build": "cd client && npm run build"
+    "build": "cd client && npm run build",
+    "generate:synthetic-images": "node ml/run_python.js ml/scripts/generate_synthetic_dataset.py --images-per-class 5000 --minimum-total 50000 --model-id stabilityai/sd-turbo --steps 2 --width 512 --height 512",
+    "prepare:image-dataset": "node ml/run_python.js ml/scripts/prepare_image_dataset.py",
+    "train:image-model": "node ml/run_python.js ml/scripts/train_image_model.py",
+    "pipeline:image-model": "npm run generate:synthetic-images && npm run prepare:image-dataset && npm run train:image-model"
   },
   "devDependencies": {
     "concurrently": "^8.2.0"

@@ -13,6 +13,23 @@ const socketHandler = (io) => {
       } else if (user.role === 'worker') {
         socket.join(ROOMS.WORKER(user.id));
         console.log(`🔧 Worker ${user.id} joined worker_${user.id}`);
+
+        // Immediately push any complaints that were assigned while the worker
+        // was disconnected so they never miss a new task on reconnect.
+        const Complaint = require('../models/Complaint');
+        Complaint.find({
+          assignedTo: user.id,
+          isActive: { $ne: false },
+          status: { $nin: ['Resolved', 'Rejected'] }
+        })
+          .select('_id complaintId category title location priority status assignedAt')
+          .lean()
+          .then(complaints => {
+            if (complaints.length > 0) {
+              socket.emit('worker_complaints_sync', { complaints });
+            }
+          })
+          .catch(() => {});
       } else if (user.role === 'student') {
         socket.join(ROOMS.STUDENT(user.id));
         console.log(`🎓 Student ${user.id} joined student_${user.id}`);

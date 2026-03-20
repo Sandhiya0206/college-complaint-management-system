@@ -1,113 +1,60 @@
-import { useState, useRef, useCallback } from 'react'
-import { mapPredictionsToCategory, calculatePriority, analyzeText } from '../utils/aiMapper'
-
-// ── Singleton model cache (loaded once per session) ──────────────────────────
-let mobilenetModel = null
-let cocoSsdModel   = null
-let modelsLoadingPromise = null
-
-const loadModels = () => {
-  if (mobilenetModel && cocoSsdModel) return Promise.resolve()
-  if (modelsLoadingPromise) return modelsLoadingPromise
-
-  modelsLoadingPromise = (async () => {
-    const tf        = await import('@tensorflow/tfjs')
-    const mobilenet = await import('@tensorflow-models/mobilenet')
-    const cocoSsd   = await import('@tensorflow-models/coco-ssd')
-    await tf.ready()
-    const [mn, coco] = await Promise.all([
-      mobilenet.load({ version: 2, alpha: 1.0 }),
-      cocoSsd.load(),
-    ])
-    mobilenetModel = mn
-    cocoSsdModel   = coco
-    console.log('[AI] TF.js models loaded (MobileNetV2 + COCO-SSD)')
-  })()
-
-  return modelsLoadingPromise
-}
+import { useState, useCallback } from 'react'
+import { analyzeText } from '../utils/aiMapper'
+import { classifyWithCLIP, loadClipModel } from '../services/localAI.service'
 
 export const useImageClassification = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisStep, setAnalysisStep] = useState(0)
+  const [modelDownloadProgress, setModelDownloadProgress] = useState(0) // 0–100, only during first download
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
-  const imgRef = useRef(null)
 
-  // ── Keyword fallback (no external deps, instant) ─────────────────────────
+  // ── Keyword fallback (instant, no model needed) ─────────────────────────
   const classifyWithKeywords = (file) => {
     const hint = analyzeText(file.name.replace(/[_\-.]/g, ' '))
     return hint
-      ? { ...hint, method: 'keyword_fallback', isSafeContent: true, analyzedAt: new Date() }
-      : { category: 'Other', priority: 'Medium', confidence: 0.3, detectedObjects: [], allScores: [], method: 'keyword_fallback', isSafeContent: true, analyzedAt: new Date() }
+      ? { ...hint, title: '', description: '', severity: 'normal', method: 'keyword_fallback', isSafeContent: true, analyzedAt: new Date() }
+      : { category: 'Other', priority: 'Medium', confidence: 0.3, title: '', description: '', severity: 'normal', detectedObjects: [], allScores: [], method: 'keyword_fallback', isSafeContent: true, analyzedAt: new Date() }
   }
 
   // ── Main entry point ─────────────────────────────────────────────────────
+  // Priority chain: CLIP (local) → keyword fallback on failure
   const analyzeImage = useCallback(async (file) => {
-    if (!file || import.meta.env.VITE_AI_ENABLED !== 'true') return null
+    if (!file) return null
 
     setIsAnalyzing(true)
     setError(null)
     setResult(null)
     setAnalysisStep(0)
+    setModelDownloadProgress(0)
 
     try {
       let analysisResult
 
+      // ── CLIP local model (free, offline, no limits) ─────────────────────
       try {
-        // Step 1 — Load TF.js models (cached after first load)
         setAnalysisStep(1)
-        await loadModels()
-
-        // Step 2 — Decode image into an HTMLImageElement
-        setAnalysisStep(2)
-        const imgEl = new Image()
-        const objectUrl = URL.createObjectURL(file)
-        await new Promise((resolve, reject) => {
-          imgEl.onload = resolve
-          imgEl.onerror = reject
-          imgEl.src = objectUrl
+        const clipResult = await classifyWithCLIP(file, ({ progress }) => {
+          setModelDownloadProgress(progress)
         })
-
-        // Step 3 — MobileNetV2 top-5 predictions
         setAnalysisStep(3)
-        const predictions = await mobilenetModel.classify(imgEl)
-
-        // Step 4 — COCO-SSD object detection
-        setAnalysisStep(4)
-        const detections = await cocoSsdModel.detect(imgEl)
-        URL.revokeObjectURL(objectUrl)
-
-        // Step 5 — Map labels → campus category + priority
-        setAnalysisStep(5)
-        const { category, confidence, detectedObjects, allScores } = mapPredictionsToCategory(predictions, detections)
-        const priority = calculatePriority(category, confidence, detectedObjects)
-
         analysisResult = {
-          category,
-          priority,
-          confidence,
-          detectedObjects,
-          allScores,
-          detectedLabels: predictions.slice(0, 5).map(p => ({ label: p.className, confidence: p.probability })),
-          method: 'tensorflow',
-          isSafeContent: true,
-          analyzedAt: new Date(),
+          ...clipResult,
+          detectedLabels: clipResult.objects?.map(label => ({ label, confidence: clipResult.confidence })) || [],
+          allScores: [{ category: clipResult.category, score: clipResult.confidence }],
         }
-
-        console.log('[AI/TFjs] →', category, '|', priority, `| ${(confidence * 100).toFixed(1)}%`)
-      } catch (tfErr) {
-        console.error('[AI] TF.js failed:', tfErr.message)
-        setError(`TF.js error — using keyword fallback: ${tfErr.message}`)
-        analysisResult = classifyWithKeywords(file)
+        console.log('[AI/CLIP] →', analysisResult.category, '|', analysisResult.priority, `| ${(analysisResult.confidence * 100).toFixed(1)}%`)
+      } catch (clipErr) {
+        throw clipErr // fall through to keyword fallback below
       }
 
       setResult(analysisResult)
       return analysisResult
     } catch (err) {
-      console.error('Image classification error:', err)
-      setError(err.message || 'Analysis failed')
-      const fallback = { category: 'Other', priority: 'Medium', confidence: 0.3, detectedObjects: [], allScores: [], method: 'keyword_fallback', isSafeContent: true }
+      // ── Last resort: keyword fallback ───────────────────────────────────────
+      console.error('[AI] All AI methods failed, using keyword fallback:', err.message)
+      setError('AI analysis unavailable — using filename keywords')
+      const fallback = classifyWithKeywords(file)
       setResult(fallback)
       return fallback
     } finally {
@@ -119,8 +66,15 @@ export const useImageClassification = () => {
     setResult(null)
     setError(null)
     setAnalysisStep(0)
+    setModelDownloadProgress(0)
     setIsAnalyzing(false)
   }, [])
 
-  return { analyzeImage, isAnalyzing, analysisStep, result, error, reset }
+  // Pre-warm: start loading CLIP model in the background as soon as the hook mounts
+  // so it's ready when the user picks an image
+  const preloadModel = useCallback(() => {
+    loadClipModel().catch(() => {}) // silently ignore pre-warm errors
+  }, [])
+
+  return { analyzeImage, isAnalyzing, analysisStep, modelDownloadProgress, result, error, reset, preloadModel }
 }

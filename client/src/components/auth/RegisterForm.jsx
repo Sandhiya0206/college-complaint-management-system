@@ -35,7 +35,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     <div className="w-full max-w-md mx-auto">
       <div className="text-center mb-8">
         <div className="text-4xl mb-3">🎓</div>
-        <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
+        <h2 className="text-2xl font-bold text-white">Create Account</h2>
         <p className="text-gray-500 text-sm mt-1">Join CampusResolve as a student</p>
       </div>
 

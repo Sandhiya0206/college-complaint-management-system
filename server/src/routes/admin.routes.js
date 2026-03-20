@@ -16,6 +16,7 @@ const { getQTableSummary } = require('../services/rlAssignment.service');
 const { retrainForest } = require('../services/isolationForest.service');
 const { learnFromHistory } = require('../services/slaPredictor.service');
 const User = require('../models/User');
+const Complaint = require('../models/Complaint');
 
 router.use(verifyJWT, requireRole('admin'));
 
@@ -23,6 +24,21 @@ router.get('/complaints', getAllComplaints);
 router.get('/escalated', getEscalatedComplaints);
 router.get('/dashboard-stats', getDashboardStats);
 router.post('/complaints/bulk-assign', bulkAssign);
+
+/* Single complaint detail — must come BEFORE /:id param routes */
+router.get('/complaints/:id', async (req, res, next) => {
+  try {
+    const complaint = await Complaint.findById(req.params.id)
+      .populate('studentId', 'name email studentId')
+      .populate('assignedTo', 'name email department phone')
+      .populate('assignedBy', 'name email')
+      .populate('statusHistory.updatedBy', 'name role')
+      .lean();
+    if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found' });
+    res.json({ success: true, complaint });
+  } catch (err) { next(err); }
+});
+
 router.put('/complaints/:id/assign', assignComplaint);
 router.put('/complaints/:id/priority', updatePriority);
 router.put('/complaints/:id/status', updateStatus);

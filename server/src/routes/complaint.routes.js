@@ -5,7 +5,7 @@ const { verifyJWT } = require('../middleware/auth.middleware');
 const { requireRole } = require('../middleware/role.middleware');
 const { uploadMedia } = require('../middleware/upload.middleware');
 const notificationService = require('../services/notification.service');
-const { findSimilarComplaints } = require('../services/duplicateDetection.service');
+const { findSimilarComplaints, mergeDuplicateGroup } = require('../services/duplicateDetection.service');
 const { findSimilarComplaintsTFIDF } = require('../services/tfidfDuplicate.service');
 const { analyseSeverity } = require('../services/severityEscalation.service');
 const { scoreGenuineness } = require('../services/genuinessScore.service');
@@ -28,7 +28,22 @@ router.get('/:id/feedback', getFeedback);
 // Feature #1 (Enhanced): Dual-engine duplicate check — Jaccard + TF-IDF cosine similarity
 router.post('/ai/check-duplicate', requireRole('student'), async (req, res, next) => {
   try {
-    const { category, location, description, hostelBlock } = req.body;
+    const { category, location, description, hostelBlock, mergeInto } = req.body;
+
+    if (mergeInto) {
+      const mergedComplaint = await mergeDuplicateGroup(mergeInto, { reporterStudentId: req.user._id });
+      if (!mergedComplaint) {
+        return res.status(404).json({ success: false, message: 'Original complaint not found for merge' });
+      }
+      await mergedComplaint.populate('assignedTo', 'name department');
+      return res.json({
+        success: true,
+        merged: true,
+        complaint: mergedComplaint,
+        message: 'Your report has been linked to the existing complaint.'
+      });
+    }
+
     // Run both detectors in parallel
     const [similar, tfidfSimilar] = await Promise.all([
       findSimilarComplaints({ category, location, description, hostelBlock }),

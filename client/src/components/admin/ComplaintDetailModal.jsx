@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, MapPin, User, Calendar, Brain, Image as ImageIcon, UserCog } from 'lucide-react'
+import { X, MapPin, User, Calendar, Brain, Image as ImageIcon, UserCog, Trash2 } from 'lucide-react'
 import { adminService } from '../../services/admin.service'
 import StatusBadge from '../common/StatusBadge'
 import PriorityBadge from '../common/PriorityBadge'
@@ -10,7 +10,6 @@ import LoadingSpinner from '../common/LoadingSpinner'
 import { formatDate, getCategoryIcon } from '../../utils/helpers'
 import { toast } from 'react-toastify'
 import GenuinenessIndicator from '../ai/GenuinenessIndicator'
-import ResolutionETA from '../ai/ResolutionETA'
 
 const STATUSES = ['Submitted', 'Assigned', 'In Progress', 'Resolved', 'Rejected']
 
@@ -21,6 +20,8 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
   const [showAssign, setShowAssign] = useState(false)
   const [lightboxImg, setLightboxImg] = useState(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -65,19 +66,34 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
     }
   }
 
+  const handleDelete = async () => {
+    if (!confirmDelete) { setConfirmDelete(true); return }
+    setIsDeleting(true)
+    try {
+      await adminService.deleteComplaint(complaintId)
+      toast.success('Complaint deleted successfully')
+      onUpdated?.()
+      onClose()
+    } catch (e) {
+      toast.error('Failed to delete complaint')
+      setIsDeleting(false)
+      setConfirmDelete(false)
+    }
+  }
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay items-start overflow-y-auto py-4" onClick={onClose}>
+      <div className="modal-content flex max-h-[calc(100vh-2rem)] flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
         {isLoading ? (
           <div className="p-8"><LoadingSpinner /></div>
         ) : complaint ? (
           <>
             {/* Header */}
-            <div className="flex items-start justify-between p-6 border-b border-gray-100">
+            <div className="flex items-start justify-between p-6 border-b border-slate-200">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xl">{getCategoryIcon(complaint.category)}</span>
-                  <h2 className="text-base font-bold text-gray-900">{complaint.title}</h2>
+                  <h2 className="text-base font-bold text-slate-900">{complaint.title}</h2>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs text-indigo-600">{complaint.complaintId}</span>
@@ -85,10 +101,32 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
                   <PriorityBadge priority={complaint.priority} />
                 </div>
               </div>
-              <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 flex-shrink-0"><X size={18} /></button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-medium transition-colors"
+                  title="Delete complaint"
+                >
+                  <Trash2 size={13} /> Delete
+                </button>
+                <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg text-gray-500 flex-shrink-0"><X size={18} /></button>
+              </div>
             </div>
 
-            <div className="p-5 overflow-y-auto max-h-[65vh] space-y-5">
+            {/* Delete confirmation banner */}
+            {confirmDelete && (
+              <div className="mx-5 mt-3 flex items-center justify-between gap-3 p-3 rounded-xl bg-red-50 border border-red-200 text-sm">
+                <span className="text-red-700">⚠️ This will remove the complaint from the worker's queue and notify the student. Confirm?</span>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button onClick={() => setConfirmDelete(false)} className="px-3 py-1 rounded-lg border border-slate-200 text-xs text-slate-600 hover:bg-slate-50">Cancel</button>
+                  <button onClick={handleDelete} disabled={isDeleting} className="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold disabled:opacity-50">
+                    {isDeleting ? 'Deleting…' : 'Yes, Delete'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="min-h-0 flex-1 overflow-y-auto p-5 space-y-5">
               {/* Images */}
               {complaint.images?.length > 0 && (
                 <div className="grid grid-cols-4 gap-2">
@@ -99,8 +137,8 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
               )}
 
               {/* Admin Actions */}
-              <div className="p-4 bg-gray-50 rounded-xl space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700">Admin Actions</h3>
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                <h3 className="text-sm font-semibold text-slate-800">Admin Actions</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="label text-xs">Status</label>
@@ -128,7 +166,7 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
                   <UserCog size={14} /> {complaint.assignedTo ? 'Reassign Worker' : 'Assign Worker'}
                 </button>
                 {complaint.assignedTo && (
-                  <div className="flex items-center gap-2 text-xs text-gray-600 bg-white p-2 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2 text-xs text-slate-600 bg-white p-2 rounded-lg border border-slate-200">
                     <User size={12} />
                     <span>Assigned to <strong>{complaint.assignedTo.name}</strong> ({complaint.assignedTo.department})</span>
                   </div>
@@ -137,17 +175,17 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
 
               {/* Details */}
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="p-3 bg-gray-50 rounded-xl">
-                  <div className="text-xs text-gray-400">Location</div>
-                  <div className="font-medium flex items-center gap-1"><MapPin size={11} />{complaint.location}</div>
+                <div className="p-3 bg-white border border-slate-200 rounded-xl">
+                  <div className="text-xs text-gray-500">Location</div>
+                  <div className="font-medium text-slate-800 flex items-center gap-1"><MapPin size={11} />{complaint.location}</div>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-xl">
-                  <div className="text-xs text-gray-400">Student</div>
-                  <div className="font-medium flex items-center gap-1"><User size={11} />{complaint.student?.name}</div>
+                <div className="p-3 bg-white border border-slate-200 rounded-xl">
+                  <div className="text-xs text-gray-500">Student</div>
+                  <div className="font-medium text-slate-800 flex items-center gap-1"><User size={11} />{complaint.student?.name}</div>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-xl">
-                  <div className="text-xs text-gray-400">Submitted</div>
-                  <div className="font-medium">{formatDate(complaint.createdAt)}</div>
+                <div className="p-3 bg-white border border-slate-200 rounded-xl">
+                  <div className="text-xs text-gray-500">Submitted</div>
+                  <div className="font-medium text-slate-800">{formatDate(complaint.createdAt)}</div>
                 </div>
               </div>
 
@@ -156,8 +194,8 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
                 <div className="p-4 bg-violet-50 border border-violet-200 rounded-xl">
                   <h3 className="text-sm font-semibold text-violet-700 mb-2 flex items-center gap-1.5"><Brain size={14} /> AI Analysis</h3>
                   <div className="grid grid-cols-2 gap-2 text-xs mb-2">
-                    <div><span className="text-gray-400">Detected:</span><div className="font-medium">{complaint.aiAnalysis.suggestedCategory}</div></div>
-                    <div><span className="text-gray-400">Method:</span><div className="font-medium">{complaint.aiAnalysis.method}</div></div>
+                    <div><span className="text-gray-500">Detected:</span><div className="font-medium text-slate-900">{complaint.aiAnalysis.suggestedCategory}</div></div>
+                    <div><span className="text-gray-500">Method:</span><div className="font-medium text-slate-900">{complaint.aiAnalysis.method}</div></div>
                     {complaint.aiAnalysis.studentOverrode && (
                       <div className="col-span-2"><span className="badge bg-orange-100 text-orange-700 border-orange-200 text-[10px]">Student overrode AI suggestion</span></div>
                     )}
@@ -166,7 +204,7 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
                   {complaint.aiAnalysis.detectedObjects?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {complaint.aiAnalysis.detectedObjects.slice(0, 6).map((o, i) => (
-                        <span key={i} className="text-[11px] bg-white border border-violet-200 rounded-full px-2 py-0.5 text-violet-600">{o.name}</span>
+                        <span key={i} className="text-[11px] bg-white border border-violet-200 rounded-full px-2 py-0.5 text-violet-700">{o.name}</span>
                       ))}
                     </div>
                   )}
@@ -175,23 +213,20 @@ const ComplaintDetailModal = ({ complaintId, onClose, onUpdated }) => {
 
               {complaint.description && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Description</h3>
-                  <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-xl">{complaint.description}</p>
+                  <h3 className="text-sm font-semibold text-slate-800 mb-1">Description</h3>
+                  <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 p-3 rounded-xl">{complaint.description}</p>
                 </div>
               )}
 
               {/* Feature #5: ETA + Feature #16: Genuineness */}
               <div className="flex flex-wrap gap-2">
-                {complaint.etaHours && !['Resolved','Rejected'].includes(complaint.status) && (
-                  <ResolutionETA etaHours={complaint.etaHours} etaConfidence={complaint.etaConfidence} etaBasedOn={complaint.etaBasedOn} compact />
-                )}
                 {complaint.genuinenessScore !== undefined && (
                   <GenuinenessIndicator score={complaint.genuinenessScore} verdict={complaint.genuinenessVerdict} flags={complaint.genuinenessFlags} compact />
                 )}
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Status Timeline</h3>
+                <h3 className="text-sm font-semibold text-slate-800 mb-3">Status Timeline</h3>
                 <ActivityTimeline history={complaint.statusHistory} />
               </div>
             </div>

@@ -1,0 +1,90 @@
+{
+  "synthetic_root": "ml/raw_dataset",
+  "real_roots": [
+    "ml/real_dataset",
+    "client/ml/dataset"
+  ],
+  "output_root": "ml/dataset",
+  "classes": {
+    "electrical": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    },
+    "plumbing": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    },
+    "furniture": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    },
+    "cleanliness": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    },
+    "ac_ventilation": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    },
+    "internet_wifi": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    },
+    "infrastructure": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    },
+    "security": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    },
+    "other": {
+      "total": 3,
+      "train": 1,
+      "val": 1,
+      "test": 1,
+      "synthetic": 3,
+      "real": 0
+    }
+  },
+  "totals": {
+    "train": 9,
+    "val": 9,
+    "test": 9,
+    "all": 27,
+    "synthetic": 27,
+    "real": 0
+  }
+}

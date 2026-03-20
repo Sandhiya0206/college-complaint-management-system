@@ -20,15 +20,17 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
+  const allowedImageTypes = /jpeg|jpg|png|gif|webp|heic|heif|bmp|tiff/;
   const allowedVideoTypes = /mp4|mov|avi|mkv|webm/;
   const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
-  const isImage = allowedImageTypes.test(ext) && allowedImageTypes.test(file.mimetype);
-  const isVideo = allowedVideoTypes.test(ext) && /video/.test(file.mimetype);
+  // Use OR — some browsers/cameras report 'application/octet-stream' or non-standard mimetypes,
+  // so we allow the file if EITHER the extension OR the mimetype looks like an image/video.
+  const isImage = allowedImageTypes.test(ext) || /image/.test(file.mimetype);
+  const isVideo = allowedVideoTypes.test(ext) || /video/.test(file.mimetype);
   if (isImage || isVideo) {
     cb(null, true);
   } else {
-    cb(new Error('Only image (jpeg, jpg, png, gif, webp) and video (mp4, mov, avi, webm) files are allowed'));
+    cb(new Error('Only image and video files are allowed'));
   }
 };
 

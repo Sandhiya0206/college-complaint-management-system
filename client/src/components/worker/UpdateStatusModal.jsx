@@ -12,6 +12,7 @@ const STATUS_OPTIONS = [
 
 const UpdateStatusModal = ({ complaint, onClose, onSuccess }) => {
   const [status, setStatus] = useState('In Progress')
+  const [workKeywords, setWorkKeywords] = useState('')
   const [remarks, setRemarks] = useState('')
   const [images, setImages] = useState([])
   const [previews, setPreviews] = useState([])
@@ -60,8 +61,8 @@ const UpdateStatusModal = ({ complaint, onClose, onSuccess }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content max-w-lg" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Update Status</h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
+          <h2 className="font-semibold text-slate-900">Update Status</h2>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg text-gray-500">
             <X size={18} />
           </button>
         </div>
@@ -93,6 +94,27 @@ const UpdateStatusModal = ({ complaint, onClose, onSuccess }) => {
             </div>
           </div>
 
+          {/* Worker keywords */}
+          <div>
+            <label className="label mb-1">
+              What Work Was Done (Keywords)
+              <span className="text-gray-400 font-normal ml-1">for AI draft</span>
+            </label>
+            <input
+              className="input-field"
+              placeholder={status === 'Resolved'
+                ? 'Example: replaced switch, fixed wiring, tested load, no spark'
+                : status === 'On Hold'
+                  ? 'Example: waiting part, vendor delay, safety lock, approval pending'
+                  : 'Example: inspection completed, fault found, tool setup, temporary fix'}
+              value={workKeywords}
+              onChange={e => setWorkKeywords(e.target.value)}
+            />
+            <p className="text-[11px] text-gray-500 mt-1">
+              Add short phrases. AI will use these keywords to draft an accurate update.
+            </p>
+          </div>
+
           {/* Remarks */}
           <div>
             <div className="flex items-center justify-between mb-1">
@@ -103,10 +125,11 @@ const UpdateStatusModal = ({ complaint, onClose, onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setShowAIDraft(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 text-xs font-medium border border-purple-200 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 text-xs font-medium border border-purple-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={workKeywords.trim().length < 5}
               >
                 <Sparkles size={12} />
-                AI Draft
+                AI Draft from Keywords
               </button>
             </div>
             <textarea
@@ -133,7 +156,7 @@ const UpdateStatusModal = ({ complaint, onClose, onSuccess }) => {
                 'Photos (optional)'
               )}
             </label>
-            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl p-4 cursor-pointer hover:border-indigo-300 text-gray-500 text-sm">
+            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 rounded-xl p-4 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 text-gray-600 text-sm">
               <Camera size={16} />
               <span>Attach photos (max 5)</span>
               <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
@@ -141,7 +164,7 @@ const UpdateStatusModal = ({ complaint, onClose, onSuccess }) => {
             {previews.length > 0 && (
               <div className="grid grid-cols-4 gap-2 mt-2">
                 {previews.map((p, i) => (
-                  <img key={i} src={p} className="w-full aspect-square object-cover rounded-lg border border-gray-200" alt="" />
+                  <img key={i} src={p} className="w-full aspect-square object-cover rounded-lg border border-slate-200" alt="" />
                 ))}
               </div>
             )}
@@ -165,6 +188,8 @@ const UpdateStatusModal = ({ complaint, onClose, onSuccess }) => {
       {showAIDraft && (
         <AIDraftModal
           complaintId={complaint._id}
+          status={status}
+          keywords={workKeywords}
           onUse={(text) => { setRemarks(text); setShowAIDraft(false) }}
           onClose={() => setShowAIDraft(false)}
         />

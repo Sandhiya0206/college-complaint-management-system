@@ -37,7 +37,7 @@ const findSimilarComplaints = async ({ category, location = '', description = ''
       isActive: true,
       createdAt: { $gte: since },
     })
-      .select('complaintId title category location description hostelBlock status priority createdAt')
+      .select('complaintId title category location description hostelBlock status priority createdAt studentId duplicateCount')
       .lean()
       .limit(200);
 
@@ -68,8 +68,10 @@ const findSimilarComplaints = async ({ category, location = '', description = ''
  * When a duplicate is confirmed, boost priority of the original complaint and
  * record the merge in statusHistory.
  */
-const mergeDuplicateGroup = async (originalId, newStudentId) => {
+const mergeDuplicateGroup = async (originalId, options = {}) => {
   try {
+    const duplicateComplaintId = options?.duplicateComplaintId || null;
+    const reporterStudentId = options?.reporterStudentId || null;
     const complaint = await Complaint.findById(originalId);
     if (!complaint) return null;
 
@@ -79,9 +81,17 @@ const mergeDuplicateGroup = async (originalId, newStudentId) => {
 
     complaint.priority = newPriority;
     complaint.duplicateCount = (complaint.duplicateCount || 0) + 1;
+
+    // Track merged complaint ids for auditability.
+    const mergedList = Array.isArray(complaint.mergedFrom) ? complaint.mergedFrom : [];
+    if (duplicateComplaintId && !mergedList.some((id) => id.toString() === duplicateComplaintId.toString())) {
+      mergedList.push(duplicateComplaintId);
+      complaint.mergedFrom = mergedList;
+    }
+
     complaint.statusHistory.push({
       status: complaint.status,
-      updatedBy: null,
+      updatedBy: reporterStudentId || null,
       timestamp: new Date(),
       remarks: `Merged duplicate complaint. Priority auto-upgraded to ${newPriority}. Total reports: ${complaint.duplicateCount + 1}`,
       isAutoUpdate: true,

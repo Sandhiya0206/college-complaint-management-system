@@ -9,11 +9,11 @@ const AssignedComplaintCard = ({ complaint, onStartWork, onUpdateStatus, onView 
   const { complaintId, category, priority, status, location, hostelBlock, roomNumber, student, aiAnalysis, assignedAt, images, slaDeadline, isEscalated } = complaint
 
   return (
-    <div className={`card hover:border-indigo-200 transition-all ${isEscalated ? 'border-red-200 bg-red-50/30' : ''}`}>
+    <div className={`card hover:border-indigo-500/40 transition-all ${isEscalated ? 'border-red-500/30 bg-red-500/5' : ''}`}>
       <div className="flex gap-4">
         {/* Category Icon */}
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${
-          priority === 'High' ? 'bg-red-50' : priority === 'Medium' ? 'bg-yellow-50' : 'bg-green-50'
+          priority === 'High' ? 'bg-red-500/15' : priority === 'Medium' ? 'bg-yellow-500/15' : 'bg-green-500/15'
         }`}>
           {images?.[0] ? (
             <img src={images[0]} className="w-full h-full object-cover rounded-xl" alt="" />
@@ -32,7 +32,7 @@ const AssignedComplaintCard = ({ complaint, onStartWork, onUpdateStatus, onView 
                   </span>
                 )}
               </div>
-              <div className="text-sm font-semibold text-gray-900 mt-0.5">{getCategoryIcon(category)} {category}</div>
+              <div className="text-sm font-semibold text-gray-800 mt-0.5">{getCategoryIcon(category)} {category}</div>
             </div>
             <PriorityBadge priority={priority} />
           </div>
@@ -49,7 +49,7 @@ const AssignedComplaintCard = ({ complaint, onStartWork, onUpdateStatus, onView 
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
             <StatusBadge status={status} />
             {aiAnalysis?.confidence && <ConfidenceBadge confidence={aiAnalysis.confidence} />}
-            <span className="text-xs text-gray-400">Assigned {formatRelativeTime(assignedAt)}</span>
+            <span className="text-xs text-gray-500">Assigned {formatRelativeTime(assignedAt)}</span>
           </div>
 
           {/* SLA Timer */}

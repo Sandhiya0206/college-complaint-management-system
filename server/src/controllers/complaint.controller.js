@@ -13,6 +13,69 @@ const { detectSpamAnomaly } = require('../services/isolationForest.service');   
 const { predictResolutionTime } = require('../services/resolutionPredictor.service');
 const { processSeverityEscalation } = require('../services/severityEscalation.service');
 const { predictSLABreach, onComplaintResolved } = require('../services/slaPredictor.service'); // Innovation #E
+const { findSimilarComplaints, mergeDuplicateGroup } = require('../services/duplicateDetection.service');
+const { findSimilarComplaintsTFIDF } = require('../services/tfidfDuplicate.service');
+
+const sanitizeText = (value, maxLen = 1000) => {
+  if (typeof value !== 'string') return '';
+  const normalized = value.replace(/\s+/g, ' ').trim();
+  if (!normalized) return '';
+  return normalized.slice(0, maxLen);
+};
+
+const buildFallbackDescription = (category, location, detectedObjects = []) => {
+  const objectNames = (Array.isArray(detectedObjects) ? detectedObjects : [])
+    .map((obj) => sanitizeText(obj?.name || obj?.label || '', 40).toLowerCase())
+    .filter(Boolean)
+    .slice(0, 3);
+
+  const evidence = objectNames.length > 0
+    ? ` Detected signs include ${objectNames.join(', ')}.`
+    : '';
+
+  return sanitizeText(
+    `Reported ${category.toLowerCase()} issue at ${location}. Please inspect the area and complete the required maintenance action.${evidence}`,
+    1000
+  );
+};
+
+const mergeDuplicateCandidates = (...lists) => {
+  const mergedMap = new Map();
+  lists.flat().forEach((item) => {
+    const id = item?._id?.toString();
+    if (!id) return;
+    if (!mergedMap.has(id) || Number(mergedMap.get(id).similarityScore || 0) < Number(item.similarityScore || 0)) {
+      mergedMap.set(id, item);
+    }
+  });
+  return [...mergedMap.values()].sort((a, b) => Number(b.similarityScore || 0) - Number(a.similarityScore || 0));
+};
+
+const normalizeComparableText = (value = '') => String(value).toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+
+const locationTokenSimilarity = (a = '', b = '') => {
+  const tokensA = new Set(normalizeComparableText(a).split(' ').filter(Boolean));
+  const tokensB = new Set(normalizeComparableText(b).split(' ').filter(Boolean));
+  if (tokensA.size === 0 || tokensB.size === 0) return 0;
+  const intersection = [...tokensA].filter((token) => tokensB.has(token)).length;
+  const union = new Set([...tokensA, ...tokensB]).size;
+  return union === 0 ? 0 : intersection / union;
+};
+
+const pickStrongDuplicate = (candidates = [], studentId, finalCategory, incomingLocation = '') => {
+  if (!Array.isArray(candidates) || candidates.length === 0) return null;
+  return candidates.find((c) => {
+    const similarity = Number(c.similarityScore || 0);
+    const sameStudent = c.studentId && studentId && c.studentId.toString() === studentId.toString();
+    const sameCategory = c.category === finalCategory;
+    const locationSim = locationTokenSimilarity(c.location || '', incomingLocation || '');
+    const sameLocation = locationSim >= 0.6;
+
+    if (sameStudent && similarity >= 55) return true;
+    if (sameCategory && sameLocation && similarity >= 64) return true;
+    return sameCategory && similarity >= 85;
+  }) || null;
+};
 
 // @desc    Create complaint (full AI pipeline)
 // @route   POST /api/complaints
@@ -46,7 +109,10 @@ const createComplaint = async (req, res, next) => {
     if (allImageFiles.length > 0) {
       const fs = require('fs');
       const buffer = fs.readFileSync(allImageFiles[0].path);
-      aiResult = await analyzeImage(buffer, clientAiData);
+      aiResult = await analyzeImage(buffer, clientAiData, {
+        imagePath: allImageFiles[0].path,
+        mimeType: allImageFiles[0].mimetype
+      });
     } else if (clientAiData.category) {
       aiResult = {
         category: clientAiData.category,
@@ -69,7 +135,61 @@ const createComplaint = async (req, res, next) => {
     const finalCategory = category_override || aiResult?.category || 'Other';
     const finalPriority = aiResult?.priority || 'Medium';
     const finalConfidence = aiResult?.confidence || 0.5;
-    const autoTitle = studentTitle?.trim() || `${finalCategory} Issue at ${location}`;
+    const studentTitleClean = sanitizeText(studentTitle, 150);
+    const studentDescriptionClean = sanitizeText(description, 1000);
+    const aiSuggestedTitle = sanitizeText(aiResult?.suggestedTitle || aiResult?.title || clientAiData?.title, 150);
+    const aiSuggestedDescription = sanitizeText(aiResult?.suggestedDescription || aiResult?.description || clientAiData?.description, 1000);
+
+    const autoTitle = studentTitleClean || aiSuggestedTitle || `${finalCategory} Issue at ${location}`;
+    const finalDescription = studentDescriptionClean
+      || aiSuggestedDescription
+      || buildFallbackDescription(finalCategory, location, aiResult?.detectedObjects);
+
+    // Server-enforced duplicate guard to prevent repeated re-submission and re-assignment.
+    const [similar, tfidfSimilar] = await Promise.all([
+      findSimilarComplaints({
+        category: finalCategory,
+        location,
+        description: finalDescription,
+        hostelBlock: hostelBlock || ''
+      }),
+      findSimilarComplaintsTFIDF({
+        category: finalCategory,
+        location,
+        description: finalDescription,
+        hostelBlock: hostelBlock || ''
+      })
+    ]);
+
+    const duplicateCandidates = mergeDuplicateCandidates(similar, tfidfSimilar);
+    const strongDuplicate = pickStrongDuplicate(duplicateCandidates, studentId, finalCategory, location);
+
+    if (strongDuplicate) {
+      const mergedComplaint = await mergeDuplicateGroup(strongDuplicate._id, { reporterStudentId: studentId });
+      if (mergedComplaint) {
+        await mergedComplaint.populate([
+          { path: 'studentId', select: 'name email studentId' },
+          { path: 'assignedTo', select: 'name email department' }
+        ]);
+
+        await createNotification(
+          studentId,
+          'status_changed',
+          'Duplicate Linked To Existing Complaint',
+          `A similar complaint (${mergedComplaint.complaintId}) already exists. Your report was linked to it instead of creating a new assignment.`,
+          mergedComplaint._id
+        );
+
+        return res.status(200).json({
+          success: true,
+          merged: true,
+          duplicateOf: mergedComplaint._id,
+          message: `Similar complaint already exists (${mergedComplaint.complaintId}). Your report has been linked to that complaint.`,
+          complaint: mergedComplaint,
+          assignedWorker: mergedComplaint.assignedTo || null
+        });
+      }
+    }
 
     // Auto-assign worker — try RL agent first, fall back to heuristic
     let assignmentResult = await findBestWorkerRL(finalCategory, finalPriority);
@@ -80,7 +200,7 @@ const createComplaint = async (req, res, next) => {
       studentId,
       category: finalCategory,
       title: autoTitle,
-      description: description || '',
+      description: finalDescription,
       location,
       images: imagePaths,
       videos: videoPaths,
@@ -97,11 +217,19 @@ const createComplaint = async (req, res, next) => {
       status: assignmentResult ? 'Assigned' : 'Submitted',
       aiAnalysis: {
         suggestedCategory: aiResult?.category || finalCategory,
+        suggestedTitle: aiSuggestedTitle || autoTitle,
+        suggestedDescription: aiSuggestedDescription || finalDescription,
         finalCategory,
         confidence: finalConfidence,
+        confidenceThreshold: aiResult?.confidenceThreshold,
+        isUncertain: aiResult?.isUncertain ?? false,
+        uncertaintyReasons: aiResult?.uncertaintyReasons || [],
+        topCategories: aiResult?.topCategories || [],
         detectedObjects: aiResult?.detectedObjects || [],
         detectedLabels: aiResult?.detectedLabels || [],
         method: aiResult?.method || 'keyword_fallback',
+        modelSource: aiResult?.model_source || aiResult?.modelSource || 'keyword_fallback',
+        signalBreakdown: aiResult?.signalBreakdown || [],
         isSafeContent: aiResult?.isSafeContent ?? true,
         studentOverrode,
         analyzedAt: new Date()
@@ -210,7 +338,7 @@ const createComplaint = async (req, res, next) => {
         const [gScore, isoScore] = await Promise.all([
           scoreGenuineness({
             title: autoTitle,
-            description: description || '',
+            description: finalDescription,
             category: finalCategory,
             location,
             hostelBlock: hostelBlock || '',
@@ -219,7 +347,7 @@ const createComplaint = async (req, res, next) => {
           }),
           detectSpamAnomaly({
             title: autoTitle,
-            description: description || '',
+            description: finalDescription,
             imageCount: imagePaths.length,
           }),
         ]);
@@ -302,15 +430,32 @@ const getMyComplaints = async (req, res, next) => {
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const [complaints, total] = await Promise.all([
-      Complaint.find(query)
-        .populate('assignedTo', 'name department')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit))
-        .lean(),
-      Complaint.countDocuments(query)
-    ]);
+    let complaints = [];
+    let total = 0;
+
+    try {
+      [complaints, total] = await Promise.all([
+        Complaint.find(query)
+          .populate('assignedTo', 'name department')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(parseInt(limit))
+          .lean(),
+        Complaint.countDocuments(query)
+      ]);
+    } catch (listErr) {
+      // Some legacy datasets may contain invalid assignedTo references that break populate.
+      // Fall back to non-populated list so student dashboard remains usable.
+      console.warn('[getMyComplaints] populate failed, falling back without populate:', listErr.message);
+      [complaints, total] = await Promise.all([
+        Complaint.find(query)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(parseInt(limit))
+          .lean(),
+        Complaint.countDocuments(query)
+      ]);
+    }
 
     res.status(200).json({
       success: true,

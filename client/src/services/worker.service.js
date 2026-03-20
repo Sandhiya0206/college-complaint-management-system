@@ -46,8 +46,8 @@ export const workerService = {
   },
 
   /* Feature #9: AI draft */
-  getAIDraft: async (id) => {
-    const { data } = await api.get(`/worker/complaints/${id}/ai-draft`)
+  getAIDraft: async (id, payload = {}) => {
+    const { data } = await api.post(`/worker/complaints/${id}/ai-draft`, payload)
     return data
   }
 }

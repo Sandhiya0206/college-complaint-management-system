@@ -1,6 +1,24 @@
 import api from './api'
 
 export const complaintService = {
+  analyzeImageWithAI: async (file, aiData = {}) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    if (aiData && Object.keys(aiData).length > 0) {
+      formData.append('aiData', JSON.stringify(aiData))
+    }
+
+    const { data } = await api.post('/image/analyze', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return data.analysis
+  },
+
+  analyzeTextWithAI: async ({ description, title = '' }) => {
+    const { data } = await api.post('/image/analyze-text', { description, title })
+    return data.analysis
+  },
+
   // Create complaint with file upload
   createComplaint: async (formData) => {
     const { data } = await api.post('/complaints', formData, {

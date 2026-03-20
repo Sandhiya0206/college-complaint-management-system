@@ -122,7 +122,7 @@ const findSimilarComplaintsTFIDF = async ({ category, location = '', description
       isActive: true,
       createdAt: { $gte: since },
     })
-      .select('complaintId title category location description hostelBlock status priority createdAt')
+      .select('complaintId title category location description hostelBlock status priority createdAt studentId duplicateCount')
       .lean()
       .limit(MAX_CANDIDATES);
 

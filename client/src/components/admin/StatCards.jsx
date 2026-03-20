@@ -18,9 +18,9 @@ const StatCards = ({ stats }) => {
       sub: `${stats.todayNewCount ?? 0} new today`,
       trend: todayTrend,
       color: 'border-l-blue-500',
-      bg: 'bg-blue-50',
+      bg: 'bg-blue-100',
       text: 'text-blue-600',
-      ring: 'ring-blue-100',
+      ring: 'ring-blue-200',
       icon: '',
     },
     {
@@ -28,9 +28,9 @@ const StatCards = ({ stats }) => {
       value: (stats.byStatus?.Submitted ?? 0) + (stats.byStatus?.Assigned ?? 0),
       sub: `${stats.byStatus?.Submitted ?? 0} unassigned`,
       color: 'border-l-amber-500',
-      bg: 'bg-amber-50',
+      bg: 'bg-amber-100',
       text: 'text-amber-600',
-      ring: 'ring-amber-100',
+      ring: 'ring-amber-200',
       icon: '',
     },
     {
@@ -38,9 +38,9 @@ const StatCards = ({ stats }) => {
       value: stats.escalatedCount ?? 0,
       sub: 'require attention',
       color: 'border-l-red-500',
-      bg: 'bg-red-50',
+      bg: 'bg-red-100',
       text: 'text-red-600',
-      ring: 'ring-red-100',
+      ring: 'ring-red-200',
       iconComponent: <AlertTriangle size={20} className="text-red-500" />,
     },
     {
@@ -48,9 +48,9 @@ const StatCards = ({ stats }) => {
       value: stats.byStatus?.Resolved ?? 0,
       sub: `${stats.resolutionRate ?? 0}% resolution rate`,
       color: 'border-l-emerald-500',
-      bg: 'bg-emerald-50',
+      bg: 'bg-emerald-100',
       text: 'text-emerald-600',
-      ring: 'ring-emerald-100',
+      ring: 'ring-emerald-200',
       icon: '',
     },
   ]
@@ -62,7 +62,7 @@ const StatCards = ({ stats }) => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">{c.label}</p>
-              <p className="text-3xl font-black text-gray-900 mt-1 tabular-nums">{c.value}</p>
+              <p className="text-3xl font-black text-slate-900 mt-1 tabular-nums">{c.value}</p>
               <div className={`flex items-center gap-1 text-xs mt-1 ${c.text} font-medium`}>
                 {c.sub}
                 {c.trend !== undefined && (

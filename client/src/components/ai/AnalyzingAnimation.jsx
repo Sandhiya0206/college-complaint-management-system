@@ -1,11 +1,10 @@
 import { Check, Loader2 } from 'lucide-react'
 
 const STEPS = [
-  'Loading TF.js models...',
-  'Reading image data...',
-  'Running MobileNet V2 (top-5)...',
-  'Running COCO-SSD detection...',
-  'Mapping to campus category...',
+  'Compressing and encoding image...',
+  'Sending to Gemini Vision API...',
+  'Analyzing campus issue in image...',
+  'Extracting category, title and details...',
 ]
 
 const AnalyzingAnimation = ({ currentStep = 0 }) => {

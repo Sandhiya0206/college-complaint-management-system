@@ -416,9 +416,62 @@ const editComplaint = async (req, res, next) => {
 // @route DELETE /api/admin/complaints/:id
 const softDeleteComplaint = async (req, res, next) => {
   try {
-    const complaint = await Complaint.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+    const io = req.app.get('io');
+    const complaint = await Complaint.findById(req.params.id)
+      .populate('studentId', '_id name')
+      .populate('assignedTo', '_id name');
     if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found' });
-    res.status(200).json({ success: true, message: 'Complaint deleted (soft)' });
+
+    complaint.isActive = false;
+    complaint.status = 'Rejected';
+    complaint.rejectionReason = 'Deleted by admin';
+    complaint.statusHistory.push({
+      status: 'Rejected',
+      updatedBy: req.user._id,
+      timestamp: new Date(),
+      remarks: 'Complaint deleted by admin',
+      isAutoUpdate: false
+    });
+    await complaint.save();
+
+    const notifPromises = [
+      notificationService.createNotification(
+        complaint.studentId._id, 'complaint_rejected',
+        'Complaint Removed',
+        `Your complaint ${complaint.complaintId} has been removed by the admin.`,
+        complaint._id
+      )
+    ];
+    if (complaint.assignedTo) {
+      notifPromises.push(
+        notificationService.createNotification(
+          complaint.assignedTo._id, 'complaint_rejected',
+          'Assigned Complaint Removed',
+          `Complaint ${complaint.complaintId} assigned to you has been deleted by the admin.`,
+          complaint._id
+        )
+      );
+    }
+    await Promise.all(notifPromises);
+
+    if (io) {
+      io.to(ROOMS.STUDENT(complaint.studentId._id)).emit(SOCKET_EVENTS.COMPLAINT_REJECTED, {
+        complaintId: complaint._id,
+        reason: 'Deleted by admin'
+      });
+      if (complaint.assignedTo) {
+        io.to(ROOMS.WORKER(complaint.assignedTo._id)).emit(SOCKET_EVENTS.COMPLAINT_REJECTED, {
+          complaintId: complaint._id,
+          reason: 'Complaint deleted by admin'
+        });
+      }
+      io.to(ROOMS.ADMIN).emit(SOCKET_EVENTS.STATUS_CHANGED, {
+        complaintId: complaint._id,
+        newStatus: 'Rejected'
+      });
+    }
+
+    res.status(200).json({ success: true, message: 'Complaint deleted successfully' });
   } catch (err) {
     next(err);
   }

@@ -1,15 +1,35 @@
 import axios from 'axios'
 
+const resolveApiBaseUrl = () => {
+  const configured = String(import.meta.env.VITE_API_URL || '').trim()
+  if (!configured) return '/api'
+  return configured.replace(/\/$/, '')
+}
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: resolveApiBaseUrl(),
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' }
 })
 
-// Request interceptor — attach token from localStorage as Bearer
+const getStoredToken = () => {
+  const raw = sessionStorage.getItem('authToken') || localStorage.getItem('authToken')
+  if (!raw) return null
+  const token = String(raw).trim()
+  if (!token || token === 'undefined' || token === 'null') return null
+  return token
+}
+
+const isAuthBootstrapRoute = (url = '') => {
+  const path = String(url || '').toLowerCase()
+  return path.includes('/auth/login') || path.includes('/auth/register')
+}
+
+// Request interceptor — prefer sessionStorage (tab-specific) so each tab sends its own token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken')
+    const token = getStoredToken()
+    config.__hadAuthToken = Boolean(token)
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
     }
@@ -23,14 +43,17 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status
-    if (status === 401 || status === 403) {
-      // Clear stale token
+    const requestUrl = error.config?.url || ''
+    const hadToken = Boolean(error.config?.__hadAuthToken)
+
+    // Only force logout for authenticated API calls that became unauthorized.
+    // Do NOT clear token state for expected 401s such as /auth/login failures.
+    if (status === 401 && hadToken && !isAuthBootstrapRoute(requestUrl)) {
+      sessionStorage.removeItem('authToken')
+      sessionStorage.removeItem('authUser')
       localStorage.removeItem('authToken')
-      // Redirect to login on auth failures
-      const currentPath = window.location.pathname
-      if (currentPath !== '/' && currentPath !== '/login') {
-        window.location.href = '/'
-      }
+      localStorage.removeItem('authUser')
+      window.dispatchEvent(new Event('auth:token-expired'))
     }
     return Promise.reject(error.response?.data || error)
   }

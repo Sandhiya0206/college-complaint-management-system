@@ -11,10 +11,9 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Read token from cookie (works since socket connects same-origin via proxy)
-      // Fall back to localStorage token stored at login
-      const cookieToken = document.cookie.split(';').find(c => c.trim().startsWith('token='))?.split('=')[1]
-      const token = cookieToken || localStorage.getItem('authToken')
+      // Prefer sessionStorage (tab-specific) so the socket uses the correct token
+      // for this tab when multiple roles are logged in simultaneously
+      const token = sessionStorage.getItem('authToken') || localStorage.getItem('authToken')
 
       if (!token) {
         console.warn('Socket: no auth token found, skipping connection')
@@ -29,7 +28,7 @@ export const SocketProvider = ({ children }) => {
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionAttempts: 10,
-        transports: ['websocket', 'polling']
+        transports: ['polling', 'websocket']
       })
 
       socketRef.current.on('connect', () => {

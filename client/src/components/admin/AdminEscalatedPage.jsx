@@ -33,17 +33,17 @@ const AdminEscalatedPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-red-100 rounded-xl">
-            <AlertTriangle size={18} className="text-red-600" />
+          <div className="p-2 bg-red-500/15 rounded-xl">
+            <AlertTriangle size={18} className="text-red-500" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Escalated Complaints</h2>
+            <h2 className="text-lg font-bold text-slate-900">Escalated Complaints</h2>
             <p className="text-xs text-gray-500">{complaints.length} complaint{complaints.length !== 1 ? 's' : ''} requiring attention</p>
           </div>
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50"
         >
           <RefreshCw size={12} /> Refresh
         </button>
@@ -58,18 +58,18 @@ const AdminEscalatedPage = () => {
           {complaints.map(c => (
             <div
               key={c._id}
-              className="card border-red-200 bg-red-50/30 cursor-pointer hover:border-red-300 transition-colors"
+              className="card border-red-500/20 bg-red-500/5 cursor-pointer hover:border-red-500/40 transition-colors"
               onClick={() => setSelectedId(c._id)}
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                <div className="w-10 h-10 bg-red-500/15 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
                   {getCategoryIcon(c.category)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <span className="font-mono text-xs text-red-600 font-medium">{c.complaintId}</span>
-                      <div className="text-sm font-semibold text-gray-900 mt-0.5">{c.category}</div>
+                      <div className="text-sm font-semibold text-slate-900 mt-0.5">{c.category}</div>
                     </div>
                     <div className="flex gap-1.5">
                       <StatusBadge status={c.status} />
@@ -84,7 +84,7 @@ const AdminEscalatedPage = () => {
                   </div>
 
                   {c.escalationReason && (
-                    <p className="text-xs text-red-700 mt-1.5 italic">"{c.escalationReason}"</p>
+                    <p className="text-xs text-red-400 mt-1.5 italic">"{c.escalationReason}"</p>
                   )}
 
                   {c.slaDeadline && (

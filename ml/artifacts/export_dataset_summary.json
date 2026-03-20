@@ -1,0 +1,22 @@
+{
+  "complaintsScanned": 27,
+  "imagesCopied": 27,
+  "imagesMissing": 0,
+  "imagesSkippedLowConfidence": 0,
+  "perClass": {
+    "electrical": 3,
+    "plumbing": 3,
+    "furniture": 3,
+    "cleanliness": 3,
+    "ac_ventilation": 3,
+    "internet_wifi": 3,
+    "infrastructure": 3,
+    "security": 3,
+    "other": 3
+  },
+  "splitCounts": {
+    "train": 9,
+    "val": 9,
+    "test": 9
+  }
+}

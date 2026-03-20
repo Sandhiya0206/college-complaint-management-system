@@ -5,10 +5,8 @@ const verifyJWT = async (req, res, next) => {
   try {
     let token;
 
-    // Check cookie first, then Authorization header
-    if (req.cookies?.token) {
-      token = req.cookies.token;
-    } else if (req.headers.authorization?.startsWith('Bearer ')) {
+    // Only accept Authorization header Bearer token — no cookie fallback
+    if (req.headers.authorization?.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
     }
 
