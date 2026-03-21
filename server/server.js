@@ -9,6 +9,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const connectDB = require('./src/config/database');
+const { connectPostgres } = require('./src/config/postgres');
 const { initSocket } = require('./src/config/socket');
 const { corsOptions } = require('./src/config/cors');
 const errorMiddleware = require('./src/middleware/error.middleware');
@@ -72,8 +73,19 @@ app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
+const connectDatabase = async () => {
+  const provider = String(process.env.DATABASE_PROVIDER || 'mongodb').trim().toLowerCase();
+
+  if (provider === 'postgres') {
+    await connectPostgres();
+    return;
+  }
+
   await connectDB();
+};
+
+const startServer = async () => {
+  await connectDatabase();
 
   server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
