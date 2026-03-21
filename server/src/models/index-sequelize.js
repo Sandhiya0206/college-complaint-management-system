@@ -1,8 +1,8 @@
 const { sequelize } = require('../config/sequelize');
 
 // Import model definitions
-const UserModel = require('./User');
-const ComplaintModel = require('./Complaint');
+const UserModel = require('./sequelize/User');
+const ComplaintModel = require('./sequelize/Complaint');
 
 // Initialize models
 const User = UserModel(sequelize);
