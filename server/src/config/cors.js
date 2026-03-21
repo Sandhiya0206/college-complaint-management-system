@@ -1,13 +1,15 @@
 const LOCAL_DEV_ORIGIN = 'http://localhost:5173';
 
+const normalizeOrigin = (value = '') => String(value).trim().replace(/\/+$/, '');
+
 const parseCsv = (value = '') => String(value)
   .split(',')
-  .map((entry) => entry.trim())
+  .map((entry) => normalizeOrigin(entry))
   .filter(Boolean);
 
 const getConfiguredOrigins = () => {
-  const origins = new Set([LOCAL_DEV_ORIGIN, ...parseCsv(process.env.CLIENT_URLS)]);
-  const clientUrl = String(process.env.CLIENT_URL || '').trim();
+  const origins = new Set([normalizeOrigin(LOCAL_DEV_ORIGIN), ...parseCsv(process.env.CLIENT_URLS)]);
+  const clientUrl = normalizeOrigin(process.env.CLIENT_URL || '');
   if (clientUrl) origins.add(clientUrl);
   return origins;
 };
@@ -27,10 +29,12 @@ const createOriginValidator = () => {
 
   return (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (configuredOrigins.has(origin)) return callback(null, true);
-    if (allowVercelPreviews && isVercelDomain(origin)) return callback(null, true);
 
-    return callback(new Error(`CORS blocked for origin: ${origin}`), false);
+    const normalizedOrigin = normalizeOrigin(origin);
+    if (configuredOrigins.has(normalizedOrigin)) return callback(null, true);
+    if (allowVercelPreviews && isVercelDomain(normalizedOrigin)) return callback(null, true);
+
+    return callback(new Error(`CORS blocked for origin: ${normalizedOrigin}`), false);
   };
 };
 
