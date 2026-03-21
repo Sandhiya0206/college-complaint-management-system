@@ -9,7 +9,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const connectDB = require('./src/config/database');
-const { connectPostgres } = require('./src/config/postgres');
+const { sequelize, testConnection, syncDatabase } = require('./src/config/sequelize');
 const { initSocket } = require('./src/config/socket');
 const { corsOptions } = require('./src/config/cors');
 const errorMiddleware = require('./src/middleware/error.middleware');
@@ -77,7 +77,17 @@ const connectDatabase = async () => {
   const provider = String(process.env.DATABASE_PROVIDER || 'mongodb').trim().toLowerCase();
 
   if (provider === 'postgres') {
-    await connectPostgres();
+    const connected = await testConnection();
+    if (!connected) {
+      throw new Error('Failed to connect to PostgreSQL database');
+    }
+    // Initialize Sequelize models and sync schema
+    require('./src/models/index-sequelize');
+    const synced = await syncDatabase();
+    if (!synced) {
+      console.warn('⚠ Database sync had issues, but continuing...');
+    }
+    console.log('✓ PostgreSQL database initialized successfully');
     return;
   }
 

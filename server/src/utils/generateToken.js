@@ -11,13 +11,16 @@ const verifyJWT = (token) => {
 };
 
 const sendTokenResponse = (user, statusCode, res) => {
-  const token = signJWT(user._id);
+  // Support both Mongoose (_id) and Sequelize (id) models
+  const userId = user._id || user.id;
+  const token = signJWT(userId);
 
   res.status(statusCode).json({
     success: true,
     token,
     user: {
-      _id: user._id,
+      id: userId,
+      _id: userId, // for backward compatibility
       name: user.name,
       email: user.email,
       role: user.role,
