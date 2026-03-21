@@ -71,17 +71,26 @@ app.get('/api/health', (req, res) => {
 // ========== FRONTEND SERVING (SPA with React Router) ==========
 // Serve static files from client dist
 const frontendPath = path.join(__dirname, '..', 'client', 'dist');
-app.use(express.static(frontendPath, { 
-  maxAge: '1d',
-  etag: false
+app.use('/assets', express.static(path.join(frontendPath, 'assets'), {
+  immutable: true,
+  maxAge: '1y'
+}));
+
+app.use(express.static(frontendPath, {
+  index: false,
+  maxAge: '1h'
 }));
 
 // SPA fallback: serve index.html for all non-API routes (React Router)
 app.get('*', (req, res) => {
-  // Don't serve index.html for actual file requests or API errors
-  if (req.path.includes('.') || req.path.startsWith('/api')) {
-    return res.status(404).json({ success: false, message: 'Not found' });
+  // Let API and upload paths continue to normal handlers
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path.startsWith('/assets')) {
+    return res.status(404).end();
   }
+
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
     if (err) res.status(404).json({ success: false, message: 'Frontend build not found' });
   });
