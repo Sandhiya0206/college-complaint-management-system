@@ -70,6 +70,16 @@ app.get('/api/health', (req, res) => {
 // ========== FRONTEND SERVING (SPA with React Router) ==========
 // Serve static files from client dist
 const frontendPath = path.join(__dirname, '..', 'client', 'dist');
+
+// Log frontend path for debugging
+console.log(`📁 Frontend dist path: ${frontendPath}`);
+const fs = require('fs');
+if (!fs.existsSync(frontendPath)) {
+  console.warn(`⚠️  WARNING: Frontend dist folder not found at ${frontendPath}`);
+  console.warn('   This will cause 404s for all frontend assets.');
+  console.warn('   Ensure npm run build:production was executed during deployment.');
+}
+
 app.use('/assets', express.static(path.join(frontendPath, 'assets'), {
   immutable: true,
   maxAge: '1y'

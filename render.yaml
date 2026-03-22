@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: college-complaint-management-system
+    plan: standard
+    runtime: node
+    buildCommand: bash build.sh
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PROVIDER
+        value: postgres
+      - key: PG_SSL
+        value: "true"
+    autoDeploy: true
