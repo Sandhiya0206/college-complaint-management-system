@@ -15,13 +15,15 @@ const verifyJWT = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findByPk(decoded.id, {
+      attributes: { exclude: ['password'] }
+    });
 
     if (!user || !user.isActive) {
       return res.status(401).json({ success: false, message: 'User not found or account deactivated.' });
     }
 
-    req.user = user;
+    req.user = user.toObject ? user.toObject() : user;
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {

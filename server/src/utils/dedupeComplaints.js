@@ -1,10 +1,9 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
-const mongoose = require('mongoose');
+const { testConnection, syncDatabase } = require('../config/sequelize');
 const Complaint = require('../models/Complaint');
 const { mergeDuplicateGroup } = require('../services/duplicateDetection.service');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/complaint_management';
 const SIMILARITY_THRESHOLD = Number(process.env.DEDUPE_SIMILARITY_THRESHOLD || 0.72);
 const TITLE_MATCH_THRESHOLD = Number(process.env.DEDUPE_TITLE_MATCH_THRESHOLD || 0.58);
 const LOOKBACK_DAYS = Number(process.env.DEDUPE_LOOKBACK_DAYS || 365);
@@ -171,7 +170,9 @@ const applyMerges = async (plans = []) => {
 const run = async () => {
   const applyMode = process.argv.includes('--apply');
 
-  await mongoose.connect(MONGODB_URI);
+  const connected = await testConnection();
+  if (!connected) throw new Error('Failed to connect to PostgreSQL');
+  await syncDatabase();
 
   const since = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
   const complaints = await Complaint.find({
@@ -190,14 +191,12 @@ const run = async () => {
 
   if (!applyMode) {
     console.log('Dry run complete. Re-run with --apply to execute merges.');
-    await mongoose.disconnect();
     return;
   }
 
   const { mergedCount, skippedCount } = await applyMerges(plans);
   console.log(`Applied merges: ${mergedCount}, skipped: ${skippedCount}.`);
 
-  await mongoose.disconnect();
 };
 
 run()

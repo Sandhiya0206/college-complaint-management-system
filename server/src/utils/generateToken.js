@@ -11,7 +11,7 @@ const verifyJWT = (token) => {
 };
 
 const sendTokenResponse = (user, statusCode, res) => {
-  // Support both Mongoose (_id) and Sequelize (id) models
+  // Support normalized model payloads with id/_id aliases
   const userId = user._id || user.id;
   const token = signJWT(userId);
 

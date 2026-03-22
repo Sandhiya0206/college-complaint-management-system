@@ -1,12 +1,10 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { testConnection, syncDatabase } = require('../config/sequelize');
 const User = require('../models/User');
 const Complaint = require('../models/Complaint');
 const Category = require('../models/Category');
 const Notification = require('../models/Notification');
-
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/complaint_management';
 
 const categories = [
   { name: 'Electrical', description: 'Electrical issues: wiring, switches, outlets, bulbs', defaultPriority: 'High', workerDepartment: 'Electrical', keywords: ['switch', 'wire', 'bulb', 'socket', 'circuit'], icon: '⚡' },
@@ -140,8 +138,10 @@ const generateSampleComplaints = (students, workers) => {
 
 const seedDB = async () => {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log('📡 Connected to MongoDB');
+    const connected = await testConnection();
+    if (!connected) throw new Error('Failed to connect to PostgreSQL');
+    await syncDatabase();
+    console.log('📡 Connected to PostgreSQL');
 
     // Clear existing data
     await Promise.all([

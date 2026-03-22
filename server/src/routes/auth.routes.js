@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, logout, getMe, updateProfile, changePassword } = require('../controllers/auth.controller');
+const { register, login, logout, getMe, updateProfile, changePassword } = require('../controllers/auth.controller-sequelize');
 const { verifyJWT } = require('../middleware/auth.middleware');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate.middleware');
