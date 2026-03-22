@@ -36,6 +36,20 @@ const errorMiddleware = (err, req, res, next) => {
     console.error('Error:', err);
   }
 
+  // Frontend requests (HTML/CSS/JS/assets) should not receive JSON errors,
+  // otherwise browsers reject styles/scripts due to strict MIME checking.
+  if (!req.path.startsWith('/api')) {
+    if (req.path.endsWith('.css')) {
+      res.type('text/css');
+    } else if (req.path.endsWith('.js')) {
+      res.type('application/javascript');
+    } else {
+      res.type('text/plain');
+    }
+
+    return res.status(statusCode).send(message);
+  }
+
   res.status(statusCode).json({
     success: false,
     message,
